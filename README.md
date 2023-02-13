@@ -3,6 +3,12 @@
 
  I made this when I was bored of doing Minecraft coding.
  
+ # To-do
+ 
+  - [ ] Add enemies
+  - [ ] Fixed sprite tree clipping
+  - [ ] Keep one time boxes through sessions
+ 
  # How it Works
  
  Most of this engine (I'm calling it an engine idrc) runs off of a yml system (except collisions) taken from the Spigot Java API
