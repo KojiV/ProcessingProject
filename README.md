@@ -7,7 +7,7 @@
  
   - [ ] Add enemies
   - [ ] Fix sprite tree clipping
-  - [ ] Keep one time boxes through sessions
+  - [x] Keep one time boxes through sessions
  
  # How it Works
  
