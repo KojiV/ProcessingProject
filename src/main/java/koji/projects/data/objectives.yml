@@ -1,0 +1,23 @@
+objectives:
+  0:
+    text: "Interact\nwith the \nSign (SPACEBAR)"
+    arrow:
+      areaX: 0
+      areaY: 0
+      x: 14
+      y: 4
+      areaLock: true
+  1:
+    text: "Go to\nthe village"
+    arrow:
+      areaX: 0
+      areaY: 2
+      x: 10
+      y: 11
+  2:
+    text: "Find the\nDungeon"
+    arrow:
+      areaX: -2
+      areaY: -4
+      x: 12
+      y: 16

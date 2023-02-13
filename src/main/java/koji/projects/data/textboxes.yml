@@ -1,0 +1,36 @@
+boxes:
+  0:
+    id: WELCOME
+    text:
+      - "Welcome to 'TEST!'"
+      - 'Here, you can explore the world!'
+      - 'However, you will need a weapon'
+      - 'For this, go north to the village'
+      - 'From there find the blacksmith'
+      - 'Good luck!'
+    objActivate: 1
+    x: 14
+    y: 5
+    areaX: 0
+    areaY: 0
+  1:
+    id: BLACKSMITHQUEST
+    text:
+      - 'Hey, welcome to my shop!'
+      - 'You need a sword?'
+      - 'Why should I give YOU a sword?'
+      - "You're the chosen one?"
+      - "Very cliche but I'll go with it"
+      - 'Take this sword,'
+      - 'and do whatever cliche thing'
+      - 'you were set out to do'
+    objActivate: 2
+    x: 10
+    y: 12
+    areaX: 0
+    areaY: 2
+  2:
+    id: BLACKSMITHTALK
+    text:
+      - 'Why do you wanna buy something?'
+      - 'You already have a weapon!'
