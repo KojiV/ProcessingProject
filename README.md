@@ -6,7 +6,7 @@
  # To-do
  
   - [ ] Add enemies
-  - [ ] Fixed sprite tree clipping
+  - [ ] Fix sprite tree clipping
   - [ ] Keep one time boxes through sessions
  
  # How it Works
