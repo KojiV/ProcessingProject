@@ -6,8 +6,8 @@
  # To-do
  
   - [ ] Add enemies
-  - [ ] Fix sprite tree clipping
-  - [x] Keep one time boxes through sessions
+  - [ ] Fix sprite tree clipping **(Might not fix)**
+  - [x] Keep one time boxes through sessions **(Fixed through player data)**
  
  # How it Works
  
