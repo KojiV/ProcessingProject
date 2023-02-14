@@ -38,17 +38,46 @@ NPCs exist and sometimes have textboxes, with the file format shown below:
 
 ```
 npcs:
-  0: #NPC ID
-    sprite: 1 #The NPC sprite to be displayed
-    x: 10 #The X tile where the NPC is
-    y: 12 #The Y tile where the NPC is
-    areaX: 0 #The X of the area where the NPC is
-    areaY: 2 #The Y of the area where the NPC is
-    textboxes: #These textboxes are based on IDs in textboxes.yml
-      initial: BLACKSMITHQUEST #This textbox only shows on first interaction
-      normal: BLACKSMITHTALK #This textbox shows every other time
-    objActivate: 2 #After first interaction, the objective (based on ID in objectives.yml) activates
-    overCounter: true #For stuff like shops, increases downward interact range
-    extraTags: #Extra booleans for the Player class to use
+  0: 
+    sprite: 1
+    x: 10
+    y: 12
+    areaX: 0 
+    areaY: 2 
+    textboxes:
+      initial: BLACKSMITHQUEST
+      normal: BLACKSMITHTALK 
+    objActivate: 2 
+    overCounter: true 
+    extraTags:
       hasSword: true
 ```
+
+### Arguments
+- Sprite
+     - 0 through 1, chooses what sprite is displayed
+     - Defaults to 0
+- X
+     - The X tile where NPC is
+- Y
+     - The Y tile where NPC is
+- areaX
+     - The X area where the NPC is (Start area is X: 0 Y: 0)
+- areaY
+     - The Y area where the NPC is (Start area is X: 0 Y: 0)
+- textboxes
+     - initial
+          - Corresponds to box in textboxes.yml
+          - This box will only show on first interaction (per save)
+     - normal
+          - Corresponds to box in textboxes.yml
+          - This box will show every time after the first
+- objActivate
+     - Argument takes int corresponding to obj in objectives.yml
+     - Upon first interaction, the obj correspondind activates
+- overCounter
+     - Default: true
+     - For stuff like shops, increases downward interact range
+- extraTags
+     - Anything here corresponds to a boolean in Player class
+     - Will set to true on activate
