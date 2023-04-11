@@ -12,10 +12,7 @@ import processing.core.PImage;
 import processing.event.KeyEvent;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class Area extends GameObject {
     @Getter
@@ -278,20 +275,22 @@ public class Area extends GameObject {
         return loadCollisions(x, y);
     }
 
-    @SneakyThrows public List<CollisionObject> loadCollisions(int x, int y) {
-        ArrayList<CollisionObject> collisions = new ArrayList<>();
-        File f = new File(Main.getPrefix() + "collisions/area" + x + "_" + y + ".txt");
+    @SneakyThrows public List<CollisionObject> loadCollisions(int areaX, int areaY) {
+        ArrayList<CollisionObject> collisions = new ArrayList<>(Collections.nCopies(576, null));
+        File f = new File(Main.getPrefix() + "collisions/area" + areaX + "_" + areaY + ".txt");
         if(f.exists()) {
             BufferedReader reader = new BufferedReader(new FileReader(f));
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] split = Main.split(line, " ");
+                int x = Integer.parseInt(split[0]);
+                int y = Integer.parseInt(split[1]);
                 CollisionObject co = new CollisionObject(
-                        Integer.parseInt(split[0]) * main.getMapScale(),
-                        Integer.parseInt(split[1]) * main.getMapScale(),
+                        x * main.getMapScale(),
+                        y * main.getMapScale(),
                         main.getMapScale(), main.getMapScale()
                 );
-                collisions.add(co);
+                collisions.set(x * 18 + y, co);
             }
         }
         return collisions;

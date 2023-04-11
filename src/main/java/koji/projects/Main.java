@@ -27,7 +27,7 @@ public class Main extends PApplet {
     //TODO: NPC overlapping top layer (not always)
 
     @Getter private static Main main;
-    @Getter private final static String prefix = "src/main/java/koji/projects/";
+    @Getter private final static String prefix = "files/";
 
     public static void main(String[] args) {
         PApplet.main(Main.class, args);
@@ -96,7 +96,8 @@ public class Main extends PApplet {
                     this.textboxes.get(npcFileConfig.getString(key + ".textboxes.normal")),
                     npcFileConfig.contains(key + ".objActivate") ? npcFileConfig.getInt(key + ".objActivate") : -1,
                     npcFileConfig.getBoolean(key + ".overCounter"),
-                    npcFileConfig, key
+                    npcFileConfig, key,
+                    npcFileConfig.contains(key + ".textboxes")
             );
             npcs.add(npc);
         }

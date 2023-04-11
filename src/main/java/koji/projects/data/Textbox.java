@@ -5,6 +5,7 @@ import koji.projects.GameObject;
 import koji.projects.character.Player;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public class Textbox extends GameObject {
     @Getter protected int x, y;
     @Getter protected Area area;
     @Getter protected List<String> text;
-    @Getter protected int objActivate;
+    @Getter @Setter protected int objActivate;
 
     public boolean intersects(Player player) {
         int[] rec1 = {

@@ -2,6 +2,7 @@ package koji.projects.data;
 
 import koji.projects.GameObject;
 import koji.projects.Utils;
+import koji.projects.character.NPC;
 import lombok.Getter;
 import lombok.Setter;
 import processing.event.KeyEvent;
@@ -65,6 +66,8 @@ public class BottomBar extends GameObject {
                             textbox.getObjActivate()
                     ));
                     getArrow().onAreaUpdate();
+                    textbox.setObjActivate(-1);
+                    if(textbox instanceof NPC) ((NPC) textbox).setTalked(true);
                 }
 
                 currentTextboxPage = -1;

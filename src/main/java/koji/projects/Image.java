@@ -1,11 +1,12 @@
 package koji.projects;
 
 import lombok.Getter;
+import lombok.Setter;
 import processing.core.PImage;
 
 public class Image {
     @Getter private final PImage image;
-    @Getter private final int x, y, offsetX, offsetY;
+    @Getter @Setter private int x, y, offsetX, offsetY;
 
     public Image(PImage image, int x, int y, int offsetX, int offsetY) {
         this.image = image;

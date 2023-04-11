@@ -4,6 +4,8 @@ import koji.projects.Image;
 import koji.projects.Main;
 import koji.projects.area.Area;
 import koji.projects.data.Textbox;
+import lombok.Getter;
+import lombok.Setter;
 import org.simpleyaml.configuration.file.FileConfiguration;
 
 import java.lang.reflect.Field;
@@ -12,16 +14,18 @@ import java.util.List;
 
 public class NPC extends Textbox {
     private final Image sprite;
-    private Textbox initialText;
     private final Textbox normalText;
     private final boolean overCounter;
     private final FileConfiguration fc;
-    private final String key;
+    @Getter private final String key;
+    @Getter @Setter private boolean talked = false;
+    @Getter private final boolean talkable;
 
     public NPC(int spriteId, int x, int y,
                int areaX, int areaY,
                Textbox initialText, Textbox normalText,
-               int objActivate, boolean overCounter, FileConfiguration fc, String key
+               int objActivate, boolean overCounter, FileConfiguration fc, String key,
+               boolean talkable
     ) {
         super(x * getMapScale(), y * getMapScale(),
                 new Area(areaX, areaY),
@@ -33,16 +37,16 @@ public class NPC extends Textbox {
                 this.x, this.y
         );
 
-        this.initialText = initialText;
-        this.normalText = normalText;
+        this.normalText = normalText == null ? initialText : normalText;
         this.overCounter = overCounter;
         this.fc = fc;
         this.key = key;
+        this.talkable = talkable;
     }
 
     @Override public void onComplete() {
-        if(initialText != null) {
-            initialText = null;
+        if(!talked) {
+            talked = true;
             text = normalText.getText();
         }
         for(String key : Main.getKeys(fc, key + ".extraTags.", false)) {

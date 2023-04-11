@@ -1,38 +1,34 @@
 package koji.projects.character;
 
-import koji.projects.GameObject;
 import koji.projects.Image;
 import koji.projects.Main;
+import koji.projects.Utils;
 import koji.projects.area.Arrow;
 import koji.projects.data.BottomBar;
 import koji.projects.data.Objective;
 import koji.projects.data.Stats;
 import koji.projects.data.Textbox;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.simpleyaml.configuration.file.FileConfiguration;
 import org.simpleyaml.configuration.file.YamlConfiguration;
-import processing.core.PGraphics;
 import processing.core.PImage;
+import processing.event.Event;
 import processing.event.KeyEvent;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public class Player extends GameObject {
-    @Getter @Setter private int x, y, interactRange, width = 25, height = 25,
+public class Player extends Moveable {
+    @Getter @Setter private int interactRange, width = 25, height = 25,
             speed = Stats.SPEED.getBaseAmount(),
             health = Stats.HEALTH.getBaseAmount(),
             defense = Stats.DEFENSE.getBaseAmount(),
             damage = Stats.DAMAGE.getBaseAmount(),
             attackSpeed = Stats.ATTACK_SPEED.getBaseAmount();
-    @Getter @Setter private State state;
-    @Getter private final boolean[] moving = new boolean[4];
     @Getter private final File playerData = new File(Main.getPrefix() + "data/player.yml");
 
     public Player() {
@@ -45,7 +41,7 @@ public class Player extends GameObject {
         loadSprites();
     }
 
-    public void loadSprites() {
+    @Override public void loadSprites() {
         PImage spriteSheet = main.loadImage(Main.getPrefix() + "textures/player/spritesheet.png");
 
         for (int state = 0; state < 2; state++) {
@@ -70,12 +66,26 @@ public class Player extends GameObject {
         return new int[] { state.getSecondOffsetX(), state.getSecondOffsetY() };
     }
 
-    public List<CollisionObject> getNearbyCollisionBoxes(List<CollisionObject> boxes) {
-        return getNearbyCollisionBoxes(boxes, x, y);
+    public List<CollisionObject> getNearbyCollisionBoxes() {
+        return getNearbyCollisionBoxes(getArea().getCollisions(), x, y);
     }
 
     public List<CollisionObject> getNearbyCollisionBoxes(List<CollisionObject> boxes, int x, int y) {
-        return boxes.stream().filter(b -> b.distance(x, y) < 3).toList();
+        int tileX = x / main.getMapScale();
+        int tileY = y / main.getMapScale();
+        int index = tileX * 18 + tileY;
+
+        return new ArrayList<>(Stream.of(
+                Utils.getOrDefault(boxes, index, null),
+                Utils.getOrDefault(boxes, index + 1, null),
+                Utils.getOrDefault(boxes, index - 1, null),
+                Utils.getOrDefault(boxes, index - 19, null),
+                Utils.getOrDefault(boxes, index - 18, null),
+                Utils.getOrDefault(boxes, index - 17, null),
+                Utils.getOrDefault(boxes, index + 19, null),
+                Utils.getOrDefault(boxes, index + 18, null),
+                Utils.getOrDefault(boxes, index + 17, null)
+        ).filter(Objects::nonNull).toList());
     }
 
     private final static HashMap<State, List<Image>> animations = new HashMap<>();
@@ -130,7 +140,7 @@ public class Player extends GameObject {
             int moveY = y + parseAddedY();
 
             if (parseAddedX() != 0 || parseAddedY() != 0) {
-                List<CollisionObject> nearbyObjects = getNearbyCollisionBoxes(getArea().getCollisions());
+                List<CollisionObject> nearbyObjects = getNearbyCollisionBoxes();
 
                 boolean canMoveHorizontal = nearbyObjects.stream().noneMatch(o ->
                         o.intersects(this, moveX, y)
@@ -276,6 +286,8 @@ public class Player extends GameObject {
     private int moveTimer1 = 0;
     private int moveTimer2 = 0;
 
+    @Setter private int upKey = 87, downKey = 83, leftKey = 65, rightKey = 68;
+
     public void keyPressed(KeyEvent event) {
         if(main.getBar().getBarState() != BottomBar.BarState.TEXT) {
             switch (event.getKeyCode()) {
@@ -311,7 +323,9 @@ public class Player extends GameObject {
                     List<Textbox> boxes = new ArrayList<>(getBoxesForArea());
                     boxes.addAll(main.getNpcs());
 
-                    if (boxes.stream().anyMatch(b -> b.intersects(getPlayer()))) {
+                    if (boxes.stream().anyMatch(b -> b.intersects(getPlayer()) &&
+                            (!(b instanceof NPC) || ((NPC) b).isTalkable()))
+                    ) {
                         Textbox box = boxes.stream().filter(
                                 b -> b.intersects(getPlayer())
                         ).findFirst().get();
@@ -403,6 +417,16 @@ public class Player extends GameObject {
             y = fC.getInt("y");
             getArrow().setObjective(Objective.objFromId(fC.getInt("obj")));
             getArea().changeArea(fC.getInt("areaX"), fC.getInt("areaY"));
+            for(String boxes : fC.getStringList("read-boxes"))
+                if(main.getTextboxes().containsKey(boxes))
+                    main.getTextboxes().get(boxes).setObjActivate(-1);
+
+            for(String npcs : fC.getStringList("talked-npcs"))
+                for (NPC npc : main.getNpcs())
+                    if(npc.getKey().equals(npcs))
+                        npc.onComplete();
+
+
             return true;
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -426,34 +450,25 @@ public class Player extends GameObject {
             fC.set("areaX", getArea().getX());
             fC.set("areaY", getArea().getY());
             fC.set("obj", getArrow().getObjective().getId());
+            List<String> list = new ArrayList<>();
+            for(String key : main.getTextboxes().keySet()) {
+                Textbox box = main.getTextboxes().get(key);
+                if(box.getObjActivate() == -1) list.add(key);
+            }
+            if(!list.isEmpty()) fC.set("read-boxes", list);
+            list = new ArrayList<>();
+            for(NPC npc : main.getNpcs()) {
+                if(npc.isTalked()) list.add(npc.getKey());
+            }
+            if(!list.isEmpty()) fC.set("talked-npcs", list);
+
             fC.save(playerData);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    @AllArgsConstructor
-    public enum State {
-        MOVE_DOWN(false),
-        MOVE_LEFT(false),
-        MOVE_RIGHT(false),
-        MOVE_UP(false),
-        ATTACK_DOWN(true, -32, 0, 0, 0),
-        ATTACK_UP(true, 0, -32, -32, -32),
-        ATTACK_RIGHT(true, 0, 0, 0, -32),
-        ATTACK_LEFT(true, -32, -32, -32, 0);
 
-        State(boolean attackingState) {
-            this.attackingState = attackingState;
-            this.firstOffsetX = 0;
-            this.firstOffsetY = 0;
-            this.secondOffsetX = 0;
-            this.secondOffsetY = 0;
-        }
-
-        @Getter private final boolean attackingState;
-        @Getter private final int firstOffsetX, firstOffsetY, secondOffsetX, secondOffsetY;
-    }
 
     @Getter @Setter private boolean hasSword = false;
 }
