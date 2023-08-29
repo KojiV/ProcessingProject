@@ -8,6 +8,8 @@
   - [ ] Add enemies
   - [ ] Fix sprite tree clipping **(Might not fix)**
   - [x] Keep one time boxes through sessions **(Fixed through player data)**
+  - [ ] Add game scaling feature (already added in non-pushed commit, but must be optimized)
+  - [ ] See combining PImage and custom Image class
  
  # How it Works
  
