@@ -1,6 +1,7 @@
 package koji.projects.data;
 
 import koji.projects.GameObject;
+import koji.projects.Main;
 import koji.projects.Utils;
 import koji.projects.character.NPC;
 import lombok.Getter;
@@ -24,14 +25,14 @@ public class BottomBar extends GameObject {
                 main.textFont(main.getTextFont());
                 main.fill(255);
 
-                main.textSize(24);
-                main.text("Health: " + main.getPlayer().getHealth(), 20, 576 + 37);
-                main.text("Speed: " + main.getPlayer().getSpeed(), 20, 576 + 71);
-                main.text("Defense: " + main.getPlayer().getDefense(), 20, 576 + 105);
-                main.text("Damage: " + main.getPlayer().getDamage(), 20 + 190, 576 + 36);
-                main.text("Atk Spd: " + main.getPlayer().getAttackSpeed(), 20 + 190, 576 + 71);
+                main.textSize(Main.getGameScale() * 24);
+                main.text("Health: " + main.getPlayer().getHealth(), 20, 613);
+                main.text("Speed: " + main.getPlayer().getSpeed(), 20, 647);
+                main.text("Defense: " + main.getPlayer().getDefense(), 20, 681);
+                main.text("Damage: " + main.getPlayer().getDamage(), 210, 612);
+                main.text("Atk Spd: " + main.getPlayer().getAttackSpeed(), 210, 647);
 
-                main.textSize(18);
+                main.textSize(Main.getGameScale() * 18);
                 main.text("Objective: ", 648, 616);
                 main.text(getArrow().getObjective().getText(), 796, 616);
             }
@@ -45,7 +46,7 @@ public class BottomBar extends GameObject {
         main.textAlign(main.CENTER);
         main.textFont(main.getTextFont());
         main.fill(255);
-        main.textSize(32);
+        main.textSize(Main.getGameScale() * 32);
 
         String text = Utils.getOrDefault(textbox.getText(), currentTextboxPage, "");
         StringBuilder sb = new StringBuilder(text);

@@ -11,5 +11,3 @@ areaY: 0
 obj: 0
 read-boxes:
   - BLACKSMITHTALK
-talked-npcs:
-  - npcs.0

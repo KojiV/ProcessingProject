@@ -7,6 +7,7 @@ import koji.projects.character.Player;
 import koji.projects.data.BottomBar;
 import koji.projects.data.Textbox;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import org.simpleyaml.configuration.file.FileConfiguration;
 import org.simpleyaml.configuration.file.YamlConfiguration;
@@ -19,11 +20,9 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class Main extends PApplet {
 
-    //TODO: Make one time text boxes persist through saves
     //TODO: NPC overlapping top layer (not always)
 
     @Getter private static Main main;
@@ -33,6 +32,7 @@ public class Main extends PApplet {
         PApplet.main(Main.class, args);
     }
 
+    @Getter @Setter private static float gameScale = 0.75f;
     @Getter private Player player;
     @Getter private Area area;
     @Getter private Arrow arrow;
@@ -41,10 +41,19 @@ public class Main extends PApplet {
     @Getter private PFont textFont, titleFont;
     @Getter private boolean couldLoadData = false;
 
-    @Override public void settings() { size(1024, 696); }
+    @Override public void settings() { size((int) (gameScale * 1024), (int) (gameScale * 696)); }
 
     @Getter private HashMap<String, Textbox> textboxes;
     @Getter private List<NPC> npcs;
+
+    public static String[] GOMETHODS = new String[] { "draw", "keyPressed", "keyReleased", "playerUpdated", "areaUpdate" };
+    public static Class<?>[][] GOCLASSES = new Class<?>[][] {
+            new Class[0],
+            new Class[] { KeyEvent.class },
+            new Class[] { KeyEvent.class },
+            new Class[0],
+            new Class[0]
+    };
 
     @SneakyThrows @Override public void setup() {
         main = this;
@@ -55,8 +64,8 @@ public class Main extends PApplet {
 
         couldLoadData = new File(prefix + "data/player.yml").exists();
 
-        textFont = createFont(prefix + "textures/font.ttf", 16);
-        titleFont = createFont(prefix + "textures/titlefont.ttf", 16);
+        textFont = createFont(prefix + "textures/font.ttf", (int) (gameScale * 16));
+        titleFont = createFont(prefix + "textures/titlefont.ttf", (int) (gameScale * 16));
 
         File textBoxesFile = new File(Main.getPrefix() + "data/textboxes.yml");
         FileConfiguration textBoxesConfig = YamlConfiguration.loadConfiguration(textBoxesFile);
@@ -107,37 +116,35 @@ public class Main extends PApplet {
         bar = new BottomBar();
         arrow = new Arrow(area, null, 14, 4);
 
-        String[] methodNames = new String[] {"draw", "keyPressed", "keyReleased" };
-        Class<?>[][] classes = new Class<?>[][] {
-                new Class[0],
-                new Class[] { KeyEvent.class },
-                new Class[] { KeyEvent.class }
-        };
-        for(int i = 0; i < 3; i++) {
-            int finalI = i;
-            gameObjects[i] = GameObject.getGameObjects().stream().filter(r -> {
-                try {
-                    r.getClass().getDeclaredMethod(methodNames[finalI], classes[finalI]);
-                    return true;
-                } catch (NoSuchMethodException e) {
-                    return false;
-                }
-            }).collect(Collectors.toList());
+        if(YamlConfiguration.loadConfiguration(new File(prefix + "data/settings.yml"))
+                .getBoolean("colemak-mode")
+        ) {
+            downKey = 82;
+            rightKey = 83;
+            eKey = 70;
         }
     }
 
-    @SuppressWarnings("unchecked")
-    List<GameObject>[] gameObjects = new List[3];
+    @Getter private int upKey = 87, downKey = 83, leftKey = 65, rightKey = 68, eKey = 69;
 
-    private boolean skipDrawingPlayer = false;
+    @SuppressWarnings("unchecked")
+    @Getter private final List<GameObject>[] gameObjects = new List[]{
+            new ArrayList<>(),
+            new ArrayList<>(),
+            new ArrayList<>(),
+            new ArrayList<>(),
+            new ArrayList<>(),
+    };
+
+    //private boolean skipDrawingPlayer = false;
     @Override public void draw() {
-        int x1 = 1024, y1 = 696, x2 = 0, y2 = 0;
+        float x1 = 1024, y1 = 696, x2 = 0, y2 = 0;
         boolean changed = false;
 
-        for(GameObject r : gameObjects[0]) {
+        for(GameObject r : new ArrayList<>(gameObjects[0])) {
             for(Image img : r.getPreviousDrawImages()) {
-                int x = img.getX();
-                int y = img.getY();
+                float x = img.getX();
+                float y = img.getY();
 
                 x1 = Math.min(x1, x);
                 y1 = Math.min(y1, y);
@@ -146,19 +153,25 @@ public class Main extends PApplet {
                 changed = true;
             }
         }
+        x1 *= gameScale;
+        y1 *= gameScale;
+        x2 *= gameScale;
+        y2 *= gameScale;
+
         boolean isNotEmpty = gameObjects[0].stream().anyMatch(go -> !go.getPreviousDrawImages().isEmpty());
         if(isNotEmpty && changed)
+            //rect((int) x1 / gameScale, (int) y1 / gameScale, (int) (x2 - x1 + 10) / gameScale, (int) (y2 - y1 + 10) / gameScale);
             image(area.getCurrentBackBackground().get(
-                    x1, y1, x2 - x1, y2 - y1
-            ), x1, y1);
+                    (int) x1, (int) y1, (int) (x2 - x1 + 10), (int) (y2 - y1 + 10)
+            ), x1 / gameScale, y1 / gameScale);
 
         for(int i = 0; i < gameObjects[0].size(); i++) {
             GameObject r = gameObjects[0].get(i);
 
             if(r.getClass().equals(Arrow.class) && area.getCurrentFrontBackground() != null) {
                 image(area.getCurrentFrontBackground().get(
-                        x1, y1, x2 - x1, y2 - y1
-                ), x1, y1);
+                        (int) x1,  (int) y1, (int) (x2 - x1 + 10), (int) (y2 - y1 + 10)
+                ), x1 / gameScale, y1 / gameScale);
 
                 /*if(!gameObjects[0].get(i - 1).getPreviousDrawImages().isEmpty()) {
                     //Issue: once player is invisible once, they stay invisible
@@ -177,17 +190,35 @@ public class Main extends PApplet {
             }
             r.setPreviousDrawImages(r.draw());
         }
-        if(intersects(x1, y1, x2 - x1, y2 - y1, 0, 574, 1028, 124)) {
+        if(intersects((int) x1, (int) y1, (int) (x2 - x1), (int) (y2 - y1),
+                0, (int) (gameScale * 574), (int) (gameScale * 1028), (int) (gameScale * 124))
+        ) {
             bar.drawBar();
         }
     }
 
     @Override public void keyPressed(KeyEvent event) {
-        gameObjects[1].forEach(r -> r.keyPressed(event));
+        for(GameObject obj : new ArrayList<>(gameObjects[1])) {
+            obj.keyPressed(event);
+        }
     }
 
     @Override public void keyReleased(KeyEvent event) {
-        gameObjects[2].forEach(r -> r.keyReleased(event));
+        for(GameObject obj : new ArrayList<>(gameObjects[2])) {
+            obj.keyReleased(event);
+        }
+    }
+
+    public void playerUpdated() {
+        for(GameObject obj : new ArrayList<>(gameObjects[3])) {
+            obj.playerUpdated();
+        }
+    }
+
+    public void areaUpdate() {
+        for(GameObject obj : new ArrayList<>(gameObjects[4])) {
+            obj.areaUpdate();
+        }
     }
 
     public static List<String> getKeys(FileConfiguration fc, String key, boolean deep) {
@@ -227,5 +258,27 @@ public class Main extends PApplet {
                 Math.abs(y1 - y2),
                 Math.abs(x1 - x2)
         ) / main.getMapScale();
+    }
+
+    // Override methods
+
+
+    @Override
+    public void image(PImage img, float a, float b) {
+        super.image(img, a * gameScale, b * gameScale);
+    }
+
+    @Override
+    public void rect(float a, float b, float c, float d) {
+        super.rect(gameScale * a, gameScale * b, gameScale * c, gameScale * d);
+    }
+
+    @Override
+    public void text(String str, float x, float y) {
+        super.text(str, gameScale * x, gameScale * y);
+    }
+
+    public static void resize(PImage img) {
+        img.resize((int) (img.width * gameScale), (int) (img.height * gameScale));
     }
 }

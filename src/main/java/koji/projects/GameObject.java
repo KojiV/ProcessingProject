@@ -15,10 +15,19 @@ import java.util.List;
 
 public class GameObject {
     @Setter protected static Main main;
-    @Getter private static final List<GameObject> gameObjects = new ArrayList<>();
-
     public GameObject() {
-        gameObjects.add(this);
+        Class<?> clazz = getClass();
+
+        do clazz = clazz.getSuperclass();
+        while (clazz != GameObject.class && clazz != null);
+        if(clazz == null) return;
+
+        for (int i = 0; i < 5; i++) {
+            try {
+                clazz.getDeclaredMethod(Main.GOMETHODS[i], Main.GOCLASSES[i]);
+                Main.getMain().getGameObjects()[i].add(this);
+            } catch (NoSuchMethodException ignored) {}
+        }
     }
 
     public void keyPressed(KeyEvent event) {}
@@ -28,6 +37,10 @@ public class GameObject {
         return new ArrayList<>();
     }
     public void keyReleased(KeyEvent event) {}
+
+    public void playerUpdated() {}
+
+    public void areaUpdate() {}
 
     public static Arrow getArrow() {
         return main.getArrow();

@@ -12,13 +12,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Arrow extends GameObject {
-    private final List<PImage> images = new ArrayList<>();
+    private final List<Image> images = new ArrayList<>();
 
     @Getter @Setter private Area area;
     @Setter @Getter private Objective objective;
     private int x, y;
     @Getter private Direction direction;
-    @Getter @Setter private PImage image;
+    @Getter @Setter private Image image;
 
     public void setX(int x, int offset) {
         this.x = x * main.getMapScale() + offset;
@@ -52,14 +52,16 @@ public class Arrow extends GameObject {
 
                     if(movementBoos[0]) y += direction;
                     else x += direction;
+                    image.setX(x);
+                    image.setY(y);
 
                     movementFlags[1]++;
                 }
 
             } else movementFlags[0]++;
 
-            main.image(image, x, y);
-            return List.of(new Image(image, x, y));
+            image.draw();
+            return List.of(image);
         }
         return new ArrayList<>();
     }
@@ -92,15 +94,17 @@ public class Arrow extends GameObject {
             movementBoos[0] = true;
         }
         image = updateImage(direction);
+        image.setX(x);
+        image.setY(y);
     }
 
-    public PImage updateImage(Direction dir) {
+    public Image updateImage(Direction dir) {
         if(images.isEmpty()) {
-            images.add(main.loadImage(Main.getPrefix() + "textures/upgo.png"));
-            images.add(main.loadImage(Main.getPrefix() + "textures/downgo.png"));
-            images.add(main.loadImage(Main.getPrefix() + "textures/rightgo.png"));
-            images.add(main.loadImage(Main.getPrefix() + "textures/leftgo.png"));
-            images.add(main.loadImage(Main.getPrefix() + "textures/arrow.png"));
+            images.add(new Image(main.loadImage(Main.getPrefix() + "textures/upgo.png")));
+            images.add(new Image(main.loadImage(Main.getPrefix() + "textures/downgo.png")));
+            images.add(new Image(main.loadImage(Main.getPrefix() + "textures/rightgo.png")));
+            images.add(new Image(main.loadImage(Main.getPrefix() + "textures/leftgo.png")));
+            images.add(new Image(main.loadImage(Main.getPrefix() + "textures/arrow.png")));
         }
         return switch (dir) {
             case UP -> images.get(0);

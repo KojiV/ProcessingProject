@@ -3,10 +3,15 @@ package koji.projects.area;
 import koji.projects.GameObject;
 import koji.projects.Image;
 import koji.projects.Main;
+import koji.projects.Utils;
 import koji.projects.character.CollisionObject;
 import koji.projects.data.Objective;
+import koji.projects.enemies.Enemy;
+import koji.projects.enemies.Slime;
 import lombok.Getter;
 import lombok.SneakyThrows;
+import org.simpleyaml.configuration.file.FileConfiguration;
+import org.simpleyaml.configuration.file.YamlConfiguration;
 import processing.core.PGraphics;
 import processing.core.PImage;
 import processing.event.KeyEvent;
@@ -28,7 +33,7 @@ public class Area extends GameObject {
             PImage image = main.loadImage(
                     Main.getPrefix() + "textures/titlescreen/background/frame_" + i + "_delay-0.05s.png"
             );
-            image.resize(1024, 576);
+            image.resize((int) (Main.getGameScale() * 1024), (int) (Main.getGameScale() * 576));
             titleScreenImages[i] = image;
         }
         currentBackBackground = titleScreenImages[0];
@@ -43,9 +48,45 @@ public class Area extends GameObject {
     @Getter private int x, y;
     @Getter private List<CollisionObject> collisions = new ArrayList<>();
 
-    public void changeArea(int x, int y) {
+    @Getter private List<Enemy> enemies = new ArrayList<>();
+
+    public boolean changeArea(int x, int y) {
+        if(!new File(Main.getPrefix() + "textures/areas/area" + x + "_" + y + "_bottom.png").exists())
+            return false;
         this.x = x;
         this.y = y;
+
+        enemies = new ArrayList<>();
+        File enemyFile = new File(Main.getPrefix() + "enemies.yml");
+        if(enemyFile.exists()) {
+            try {
+                FileConfiguration enemyFC = YamlConfiguration.loadConfiguration(enemyFile);
+                if (enemyFC.contains("area" + x + "_" + y)) {
+                    for(String key : Utils.getKeys(enemyFC, "area" + x + "_" + y + ".", false)) {
+                        String[] split = enemyFC.getString(key + ".type").split("\\.");
+                        String type = split[split.length - 1];
+                        if(type.equals("SLIME")) {
+                            enemies.add(new Slime(
+                                    enemyFC.getInt(key + ".x"),
+                                    enemyFC.getInt(key + ".y"),
+                                    this,
+                                    enemyFC.getDouble(key + ".view-range"),
+                                    30
+                            ));
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            try {
+                boolean boo = enemyFile.createNewFile();
+                if(!boo) Main.println("Failed to create file...");
+            } catch (IOException ex) {
+                Main.println("Failed to create file...");
+            }
+        }
 
         titleVars[0] = 1;
 
@@ -97,6 +138,9 @@ public class Area extends GameObject {
 
         collisions = loadCollisions();
 
+        Main.resize(currentBackBackground);
+        Main.resize(currentFrontBackground);
+
         main.translate(0, 0);
         main.rotate(0);
         main.image(currentBackBackground, 0, 0);
@@ -111,15 +155,20 @@ public class Area extends GameObject {
         } catch (IOException e) {
             Main.println("oooo fuck...");
         }
+
+        main.areaUpdate();
+
+        return true;
     }
 
-    public void changeArea(Arrow.Direction direction) {
+    public boolean changeArea(Arrow.Direction direction) {
         switch (direction) {
             case UP -> changeArea(x, y - 1);
             case DOWN -> changeArea(x, y + 1);
             case LEFT -> changeArea(x - 1, y);
             case RIGHT -> changeArea(x + 1, y);
         }
+        return false;
     }
 
     private final PImage[] titleScreenImages = new PImage[28];
@@ -131,6 +180,7 @@ public class Area extends GameObject {
     private final int[] titleVars = new int[4];
     private boolean titleMovingRight;
     private final int[] titleScreenCords = new int[] { 68, 14 };
+    private Image titleScreenArrow = null;
     private boolean newGameSelected = true;
 
     @Getter private HashMap<int[], List<Integer>> topLayerAreas = new HashMap<>();
@@ -145,17 +195,17 @@ public class Area extends GameObject {
                 main.stroke(255, 0, 124);
                 main.fill(255, 0, 124);
                 main.rect(0, 0, 1024, 120);
-                main.translate(512, 200);
+                main.translate(Main.getGameScale() * 512, Main.getGameScale() * 200);
                 main.rotate(Main.radians(titleVars[3]));
                 main.textFont(main.getTitleFont());
-                main.textSize(128);
+                main.textSize(Main.getGameScale() * 128);
                 main.fill(0);
                 main.textAlign(main.CENTER);
                 main.text("Test", 0, 0);
                 main.fill(255);
                 main.text("Test", -6, -6);
-                main.circle(0, 0, 5);
-                main.textSize(32);
+                main.circle(0, 0, Main.getGameScale() * 5);
+                main.textSize(Main.getGameScale() * 32);
                 main.fill(0);
                 main.text("New Game", 0, 50); //14 =
                 main.fill(255);
@@ -166,7 +216,12 @@ public class Area extends GameObject {
                     main.fill(255);
                     main.text("Continue", -4, 81);
                 }
-                main.image(getArrow().updateImage(Arrow.Direction.LEFT), titleScreenCords[0], titleScreenCords[1]);
+
+                if(titleScreenArrow != null) {
+                    titleScreenArrow.setX(titleScreenCords[0]);
+                    titleScreenArrow.setY(titleScreenCords[1]);
+                    titleScreenArrow.draw();
+                } else titleScreenArrow = getArrow().updateImage(Arrow.Direction.LEFT);
 
                 titleVars[0] = 0;
 
@@ -200,21 +255,28 @@ public class Area extends GameObject {
 
     public void keyPressed(KeyEvent event) {
         if(isOnTitleScreen()) {
-            switch (event.getKeyCode()) {
-                case 87: case 83: case 65: case 68: case Main.UP: case Main.DOWN: case Main.LEFT: case Main.RIGHT:
-                    if(main.isCouldLoadData()) {
-                        newGameSelected = !newGameSelected;
-                        titleScreenCords[1] = newGameSelected ? 14 : 49;
+            int key = event.getKeyCode();
+            if(key == main.getUpKey() ||
+                    key == main.getDownKey() ||
+                    key == main.getLeftKey() ||
+                    key == main.getRightKey() ||
+                    key == Main.UP || key == Main.DOWN ||
+                    key == Main.LEFT || key == Main.RIGHT
+            ) {
+                if(main.isCouldLoadData()) {
+                    newGameSelected = !newGameSelected;
+                    titleScreenCords[1] = newGameSelected ? 14 : 49;
+                }
+            } else if (key == Main.ENTER) {
+                main.translate(0, 0);
+                main.rotate(0);
+                if(newGameSelected || !getPlayer().readStats()) {
+                    if(new File(Main.getPrefix() + "data/player.yml").exists()) {
+                        new File(Main.getPrefix() + "data/player.yml").delete();
                     }
-                    break;
-                case Main.ENTER:
-                    main.translate(0, 0);
-                    main.rotate(0);
-                    if(newGameSelected || !getPlayer().readStats()) {
-                        getArrow().setObjective(new Objective());
-                        changeArea(0, 0);
-                    }
-                    break;
+                    getArrow().setObjective(new Objective());
+                    changeArea(0, 0);
+                }
             }
         }
         if(event.getKey() == 't') System.out.println(main.frameRate);

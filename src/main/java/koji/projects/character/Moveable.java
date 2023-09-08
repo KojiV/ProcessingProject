@@ -1,16 +1,24 @@
 package koji.projects.character;
 
 import koji.projects.GameObject;
+import koji.projects.Image;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 public abstract class Moveable extends GameObject {
+
+    public Moveable() {
+        super();
+    }
+
     public abstract void loadSprites();
-    @Getter @Setter protected int x, y;
+
+    @Getter @Setter protected int x, y, speed, health, defense, damage, attackSpeed;
 
     @Getter protected final boolean[] moving = new boolean[4];
     @Getter @Setter protected State state;
+    @Getter protected Image sprite;
 
     @AllArgsConstructor
     public enum State {

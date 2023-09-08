@@ -13,7 +13,6 @@ import lombok.Setter;
 import org.simpleyaml.configuration.file.FileConfiguration;
 import org.simpleyaml.configuration.file.YamlConfiguration;
 import processing.core.PImage;
-import processing.event.Event;
 import processing.event.KeyEvent;
 
 import java.io.File;
@@ -23,20 +22,23 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Player extends Moveable {
-    @Getter @Setter private int interactRange, width = 25, height = 25,
-            speed = Stats.SPEED.getBaseAmount(),
-            health = Stats.HEALTH.getBaseAmount(),
-            defense = Stats.DEFENSE.getBaseAmount(),
-            damage = Stats.DAMAGE.getBaseAmount(),
-            attackSpeed = Stats.ATTACK_SPEED.getBaseAmount();
+    @Getter @Setter private int interactRange,
+            width = 25,
+            height = 25;
     @Getter private final File playerData = new File(Main.getPrefix() + "data/player.yml");
 
     public Player() {
         super();
-        this.x = 32 * 16 - 8;
-        this.y = 64 * 2;
+        this.x = 504;
+        this.y = 128;
         this.state = State.MOVE_DOWN;
         this.interactRange = 20;
+
+        this.speed = Stats.SPEED.getBaseAmount();
+        this.health = Stats.HEALTH.getBaseAmount();
+        this.defense = Stats.DEFENSE.getBaseAmount();
+        this.damage = Stats.DAMAGE.getBaseAmount();
+        this.attackSpeed = Stats.ATTACK_SPEED.getBaseAmount();
 
         loadSprites();
     }
@@ -49,7 +51,7 @@ public class Player extends Moveable {
                 State s = State.values()[state * 4 + i];
                 List<Image> images = new ArrayList<>();
                 for (int i1 = 0; i1 < (state == 1 ? 4 : 7); i1++) {
-                    int amount = 32 * (state + 1);
+                    int amount = (state + 1) * 32 ;
                     int extra = state == 1 ? 128 : 0;
                     PImage img = spriteSheet.get(i1 * amount, i * amount + extra, amount, amount);
                     images.add(new Image(img, x, y, getOffsets(s, i1)));
@@ -115,7 +117,10 @@ public class Player extends Moveable {
                     }
                 }
                 sprite = animations.get(state).get(0);
-                display();
+                sprite.setX(x + sprite.getOffsetX());
+                sprite.setY(y + sprite.getOffsetY());
+
+                sprite.draw(Main.getGameScale());
             } else moveTimer2++;
 
         } else moveTimer1++;
@@ -148,11 +153,13 @@ public class Player extends Moveable {
                 boolean canMoveVertical = nearbyObjects.stream().noneMatch(o ->
                         o.intersects(this, x, moveY)
                 ) && moveY > -1 && moveY < 567 - height;
+                //Main.println(canMoveHorizontal, canMoveVertical);
 
                 if ((canMoveHorizontal || canMoveVertical) && Arrays.stream(
                         Arrow.Direction.getCoreDirections()).noneMatch(
                         d -> isOffscreen(d) && canMove(d)
                 )) {
+                    //Main.println("asparagus", x, y, moveX, moveY);
                     x = canMoveHorizontal ? moveX : x;
                     y = canMoveVertical ? moveY : y;
                 } else if (Arrays.stream(Arrow.Direction.getCoreDirections()).anyMatch(
@@ -170,9 +177,10 @@ public class Player extends Moveable {
                         case LEFT -> changedCords[0] = 2;
                         case RIGHT -> changedCords[0] = 1022 - width;
                     }
-                    x = changedCords[0];
-                    y = changedCords[1];
-                    main.getArea().changeArea(dir);
+                    if(main.getArea().changeArea(dir)) {
+                        x = changedCords[0];
+                        y = changedCords[1];
+                    }
                 }
             }
         }
@@ -199,6 +207,7 @@ public class Player extends Moveable {
             case LEFT -> changedCords[0] = 2;
             case RIGHT -> changedCords[0] = 1022 - width;
         }
+
         List<CollisionObject> objects = getArea().loadCollisions(nextArea[0], nextArea[1]);
 
         if(objects.isEmpty()) return false;
@@ -215,6 +224,7 @@ public class Player extends Moveable {
             case LEFT -> x - 1 < 0;
             case RIGHT -> x + 1 > 1023 - width;
             case SAME -> false; //This should never hit LMAO
+            // why the lmao past me???
         };
     }
 
@@ -232,53 +242,27 @@ public class Player extends Moveable {
         return added;
     }
 
-    @Getter Image sprite;
-
-    public void display() {
-        main.image(sprite.getImage(), x + sprite.getOffsetX(), y + sprite.getOffsetY());
-    }
-
     public List<Image> draw() {
         if(!getArea().isOnTitleScreen()) {
             if ((parseAddedX() != 0 || parseAddedY() != 0) || state.isAttackingState()) {
+                State correctState;
                 switch (moveOverrideSprite) {
-                    default -> {
-                        sprite = animations.get(
-                                !state.isAttackingState() ? State.MOVE_UP : State.ATTACK_UP
-                        ).get(moveTimer2);
-
-                        if(!state.isAttackingState()) walkFunction();
-                        else attackFunction();
-                    }
-                    case 1 -> {
-                        sprite = animations.get(
-                                !state.isAttackingState() ? State.MOVE_DOWN : State.ATTACK_DOWN
-                        ).get(moveTimer2);
-                        if(!state.isAttackingState()) walkFunction();
-                        else attackFunction();
-                    }
-                    case 2 -> {
-                        sprite = animations.get(
-                                !state.isAttackingState() ? State.MOVE_LEFT : State.ATTACK_LEFT
-                        ).get(moveTimer2);
-                        if(!state.isAttackingState()) walkFunction();
-                        else attackFunction();
-                    }
-                    case 3 -> {
-                        sprite = animations.get(
-                                !state.isAttackingState() ? State.MOVE_RIGHT : State.ATTACK_RIGHT
-                        ).get(moveTimer2);
-                        if(!state.isAttackingState()) walkFunction();
-                        else attackFunction();
-                    }
+                    default -> correctState = !state.isAttackingState() ? State.MOVE_UP : State.ATTACK_UP;
+                    case 1 -> correctState = !state.isAttackingState() ? State.MOVE_DOWN : State.ATTACK_DOWN;
+                    case 2 -> correctState = !state.isAttackingState() ? State.MOVE_LEFT : State.ATTACK_LEFT;
+                    case 3 -> correctState = !state.isAttackingState() ? State.MOVE_RIGHT : State.ATTACK_RIGHT;
                 }
+
+                if(!state.isAttackingState()) walkFunction();
+                else attackFunction();
+                sprite = animations.get(correctState).get(moveTimer2);
+                sprite.setX(x);
+                sprite.setY(y);
+
+                main.playerUpdated();
             }
-            display();
-            return List.of(new Image(
-                    sprite.getImage(),
-                    x + sprite.getOffsetX(),
-                    y + sprite.getOffsetY())
-            );
+            sprite.draw();
+            return List.of(sprite);
         }
         return new ArrayList<>();
     }
@@ -286,101 +270,90 @@ public class Player extends Moveable {
     private int moveTimer1 = 0;
     private int moveTimer2 = 0;
 
-    @Setter private int upKey = 87, downKey = 83, leftKey = 65, rightKey = 68;
-
     public void keyPressed(KeyEvent event) {
         if(main.getBar().getBarState() != BottomBar.BarState.TEXT) {
-            switch (event.getKeyCode()) {
-                case 87, Main.UP -> {
-                    moving[0] = true;
-                    if(!state.isAttackingState()) {
-                        moveOverrideSprite = 0;
-                        state = State.MOVE_UP;
-                    }
+            int key = event.getKeyCode();
+            if(key == Main.UP || key == main.getUpKey()) {
+                moving[0] = true;
+                if(!state.isAttackingState()) {
+                    moveOverrideSprite = 0;
+                    state = State.MOVE_UP;
                 }
-                case 83, Main.DOWN -> {
-                    moving[1] = true;
-                    if(!state.isAttackingState()) {
-                        moveOverrideSprite = 1;
-                        state = State.MOVE_DOWN;
-                    }
+            } else if (key == Main.DOWN || key == main.getDownKey()) {
+                moving[1] = true;
+                if(!state.isAttackingState()) {
+                    moveOverrideSprite = 1;
+                    state = State.MOVE_DOWN;
                 }
-                case 65, Main.LEFT -> {
-                    moving[2] = true;
-                    if(!state.isAttackingState()) {
-                        moveOverrideSprite = 2;
-                        state = State.MOVE_LEFT;
-                    }
+            } else if (key == Main.LEFT || key == main.getLeftKey()) {
+                moving[2] = true;
+                if(!state.isAttackingState()) {
+                    moveOverrideSprite = 2;
+                    state = State.MOVE_LEFT;
                 }
-                case 68, Main.RIGHT -> {
-                    moving[3] = true;
-                    if(!state.isAttackingState()) {
-                        moveOverrideSprite = 3;
-                        state = State.MOVE_RIGHT;
-                    }
+            } else if (key == Main.RIGHT || key == main.getRightKey()) {
+                moving[3] = true;
+                if(!state.isAttackingState()) {
+                    moveOverrideSprite = 3;
+                    state = State.MOVE_RIGHT;
                 }
-                case 32 -> {
-                    List<Textbox> boxes = new ArrayList<>(getBoxesForArea());
-                    boxes.addAll(main.getNpcs());
+            } else if (key == 32) {
+                List<Textbox> boxes = new ArrayList<>(getBoxesForArea());
+                boxes.addAll(main.getNpcs());
 
-                    if (boxes.stream().anyMatch(b -> b.intersects(getPlayer()) &&
-                            (!(b instanceof NPC) || ((NPC) b).isTalkable()))
-                    ) {
-                        Textbox box = boxes.stream().filter(
-                                b -> b.intersects(getPlayer())
-                        ).findFirst().get();
-                        main.getBar().setTextbox(box);
-                        main.getBar().setBarState(BottomBar.BarState.TEXT);
-                    }
+                if (boxes.stream().anyMatch(b -> b.intersects(getPlayer()) &&
+                        (!(b instanceof NPC) || ((NPC) b).isTalkable()))
+                ) {
+                    Textbox box = boxes.stream().filter(
+                            b -> b.intersects(getPlayer())
+                    ).findFirst().get();
+                    main.getBar().setTextbox(box);
+                    main.getBar().setBarState(BottomBar.BarState.TEXT);
                 }
-                case 69 -> {
-                    if(hasSword && !state.isAttackingState()) {
-                        moveTimer1 = 0;
-                        moveTimer2 = 0;
-                        switch (state) {
-                            case MOVE_UP -> {
-                                state = State.ATTACK_UP;
-                                moveOverrideSprite = 0;
-                            }
-                            case MOVE_DOWN -> {
-                                state = State.ATTACK_DOWN;
-                                moveOverrideSprite = 1;
-                            }
-                            case MOVE_LEFT -> {
-                                state = State.ATTACK_LEFT;
-                                moveOverrideSprite = 2;
-                            }
-                            case MOVE_RIGHT -> {
-                                state = State.ATTACK_RIGHT;
-                                moveOverrideSprite = 3;
-                            }
+            } else if (key == main.getEKey()) {
+                if(hasSword && !state.isAttackingState()) {
+                    moveTimer1 = 0;
+                    moveTimer2 = 0;
+                    switch (state) {
+                        case MOVE_UP -> {
+                            state = State.ATTACK_UP;
+                            moveOverrideSprite = 0;
+                        }
+                        case MOVE_DOWN -> {
+                            state = State.ATTACK_DOWN;
+                            moveOverrideSprite = 1;
+                        }
+                        case MOVE_LEFT -> {
+                            state = State.ATTACK_LEFT;
+                            moveOverrideSprite = 2;
+                        }
+                        case MOVE_RIGHT -> {
+                            state = State.ATTACK_RIGHT;
+                            moveOverrideSprite = 3;
                         }
                     }
-                    //Attacking (if it has sword)
+
                 }
+                //Attacking (if it has sword)
             }
         }
+        if(event.getKey() == 'c')
+            Main.println("Cords:", x, y, x / main.getMapScale(), y / main.getMapScale());
     }
 
     public void keyReleased(KeyEvent event) {
-        boolean did = false;
-        switch (event.getKeyCode()) {
-            case 87, Main.UP -> {
-                moving[0] = false;
-                did = true;
-            }
-            case 83, Main.DOWN -> {
-                moving[1] = false;
-                did = true;
-            }
-            case 65, Main.LEFT -> {
-                moving[2] = false;
-                did = true;
-            }
-            case 68, Main.RIGHT -> {
-                moving[3] = false;
-                did = true;
-            }
+        boolean did = true;
+        int key = event.getKeyCode();
+        if(key == main.getUpKey() || key == Main.UP) {
+            moving[0] = false;
+        } else if (key == main.getDownKey() || key == Main.DOWN) {
+            moving[1] = false;
+        } else if (key == main.getLeftKey() || key == Main.LEFT) {
+            moving[2] = false;
+        } else if (key == main.getRightKey() || key == Main.RIGHT) {
+            moving[3] = false;
+        } else {
+            did = false;
         }
         if (did && !state.isAttackingState()) {
             moveTimer1 = 0;
@@ -398,7 +371,6 @@ public class Player extends Moveable {
                             case 2 -> state = State.MOVE_LEFT;
                             case 3 -> state = State.MOVE_RIGHT;
                         }
-
                     }
                 }
             }
