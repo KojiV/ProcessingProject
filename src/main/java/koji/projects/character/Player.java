@@ -120,7 +120,7 @@ public class Player extends Moveable {
                 sprite.setX(x + sprite.getOffsetX());
                 sprite.setY(y + sprite.getOffsetY());
 
-                sprite.draw(Main.getGameScale());
+                sprite.draw();
             } else moveTimer2++;
 
         } else moveTimer1++;

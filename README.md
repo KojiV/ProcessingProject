@@ -9,12 +9,12 @@
   - [ ] Fix sprite tree clipping **(Might not fix)**
   - [x] Keep one time boxes through sessions **(Fixed through player data)**
   - [x] Add game scaling feature (already added in non-pushed commit, but must be optimized) **(Added cuz I'm cool)**
-  - [ ] Fix issue with moving sprite at the end of sword animation (tf is going on?)
+  - [x] Fix issue with moving sprite at the end of sword animation (tf is going on?) **(Fixed, I feel like an idiot lmao)**
   - [x] See combining PImage and custom Image class **(NOPE, not doing!)**
  
  # How it Works
  
- Most of this engine (I'm calling it an engine idrc) runs off of a yml system (except collisions) taken from the Spigot Java API
+ Most of this engine (I'm calling it an engine idrc) runs off of a yml system (except collisions) taken from the Spigot Java API.
  
  ## Areas
 
@@ -77,7 +77,7 @@ npcs:
           - This box will show every time after the first
 - objActivate
      - Argument takes int corresponding to obj in objectives.yml
-     - Upon first interaction, the obj correspondind activates
+     - Upon first interaction, the obj corresponding activates
 - overCounter
      - Default: true
      - For stuff like shops, increases downward interact range

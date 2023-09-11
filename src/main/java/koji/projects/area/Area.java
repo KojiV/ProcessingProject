@@ -162,13 +162,13 @@ public class Area extends GameObject {
     }
 
     public boolean changeArea(Arrow.Direction direction) {
-        switch (direction) {
+        return switch (direction) {
             case UP -> changeArea(x, y - 1);
             case DOWN -> changeArea(x, y + 1);
             case LEFT -> changeArea(x - 1, y);
             case RIGHT -> changeArea(x + 1, y);
-        }
-        return false;
+            default -> false;
+        };
     }
 
     private final PImage[] titleScreenImages = new PImage[28];
