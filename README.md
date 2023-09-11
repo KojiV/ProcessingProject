@@ -8,8 +8,9 @@
   - [ ] Add enemies
   - [ ] Fix sprite tree clipping **(Might not fix)**
   - [x] Keep one time boxes through sessions **(Fixed through player data)**
-  - [ ] Add game scaling feature (already added in non-pushed commit, but must be optimized)
-  - [ ] See combining PImage and custom Image class
+  - [x] Add game scaling feature (already added in non-pushed commit, but must be optimized) **(Added cuz I'm cool)**
+  - [ ] Fix issue with moving sprite at the end of sword animation (tf is going on?)
+  - [x] See combining PImage and custom Image class **(NOPE, not doing!)**
  
  # How it Works
  
