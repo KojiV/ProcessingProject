@@ -279,8 +279,8 @@ public class Area extends GameObject {
                 main.translate(0, 0);
                 main.rotate(0);
                 if(newGameSelected || !getPlayer().readStats()) {
-                    if(new File(Main.getPrefix() + "data/player.yml").exists()) {
-                        new File(Main.getPrefix() + "data/player.yml").delete();
+                    if(new File(Main.getPrefix() + "data/player/player.yml").exists()) {
+                        new File(Main.getPrefix() + "data/player/player.yml").delete();
                     }
                     getArrow().setObjective(new Objective());
                     changeArea(0, 0);

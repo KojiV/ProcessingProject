@@ -62,7 +62,7 @@ public class Main extends PApplet {
         area = new Area();
         mapScale = 32;
 
-        couldLoadData = new File(prefix + "data/player.yml").exists();
+        couldLoadData = new File(prefix + "data/player/player.yml").exists();
 
         textFont = createFont(prefix + "textures/font.ttf", (int) (gameScale * 16));
         titleFont = createFont(prefix + "textures/titlefont.ttf", (int) (gameScale * 16));

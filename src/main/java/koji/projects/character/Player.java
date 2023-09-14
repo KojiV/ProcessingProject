@@ -25,7 +25,7 @@ public class Player extends Moveable {
     @Getter @Setter private int interactRange,
             width = 25,
             height = 25;
-    @Getter private final File playerData = new File(Main.getPrefix() + "data/player.yml");
+    @Getter private final File playerData = new File(Main.getPrefix() + "data/player/player.yml");
 
     public Player() {
         super();
