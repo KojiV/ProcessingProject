@@ -20,6 +20,7 @@ public class NPC extends Textbox {
     @Getter private final String key;
     @Getter @Setter private boolean talked = false;
     @Getter private final boolean talkable;
+    private boolean visible;
 
     public NPC(int spriteId, int x, int y,
                int areaX, int areaY,
@@ -42,6 +43,7 @@ public class NPC extends Textbox {
         this.fc = fc;
         this.key = key;
         this.talkable = talkable;
+        visible = false;
     }
 
     @Override public void onComplete() {
@@ -63,8 +65,12 @@ public class NPC extends Textbox {
         }
     }
 
+    @Override public void areaUpdate() {
+        visible = main.getArea().matches(area);
+    }
+
     @Override public List<Image> draw() {
-        if(main.getArea().matches(area)) {
+        if(visible) {
             main.image(sprite.getImage(), x, y);
             return List.of(sprite);
         }

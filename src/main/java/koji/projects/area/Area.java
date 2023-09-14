@@ -45,6 +45,14 @@ public class Area extends GameObject {
         this.y = y;
     }
 
+    public Area(Area area) {
+        this(area.getX(), area.getY());
+        this.currentBackBackground = area.getCurrentBackBackground();
+        this.currentFrontBackground = area.getCurrentFrontBackground();
+        this.collisions = area.getCollisions();
+        this.enemies = area.getEnemies();
+    }
+
     @Getter private int x, y;
     @Getter private List<CollisionObject> collisions = new ArrayList<>();
 

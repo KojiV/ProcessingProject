@@ -8,7 +8,7 @@ public class Slime extends Enemy {
     private int jumpTimer;
 
     public Slime(int spawnX, int spawnY, Area spawnArea, double viewRange, int jumpSpeed) {
-        super(spawnX, spawnY, spawnArea, Type.SLIME, viewRange);
+        super(spawnX, spawnY, new Area(spawnArea), Type.SLIME, viewRange);
         this.jumpSpeed = jumpSpeed;
     }
 }

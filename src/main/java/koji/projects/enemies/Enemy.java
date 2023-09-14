@@ -12,22 +12,22 @@ import processing.core.PImage;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public abstract class Enemy extends Moveable {
-    protected int spawnX;
-    protected int spawnY;
     protected Area spawnArea;
     protected PImage spriteSheet;
     protected double viewRange;
     @Getter boolean lockedOn = false;
+    @Getter private Type type;
 
     public Enemy(int spawnX, int spawnY, Area spawnArea, Type type, double viewRange) {
-        super();
-        this.spawnX = spawnX;
-        this.spawnY = spawnY;
+        this.x = spawnX * getMapScale();
+        this.y = spawnY * getMapScale();
         this.spawnArea = spawnArea;
+        this.type = type;
         this.viewRange = viewRange;
 
         if(!new File(Main.getPrefix() + "textures/enemies/" + type.getSpriteTag() + ".png").exists())
@@ -46,19 +46,33 @@ public abstract class Enemy extends Moveable {
         defense = 0;
         damage = 2;
         attackSpeed = 3;
+
+        isVisible = false;
+        animationTimers = new int[2];
+        state = State.MOVE_DOWN;
     }
 
     private boolean isVisible;
+    private int[] animationTimers;
 
     @Override public void areaUpdate() {
-        isVisible = getArea().matches(spawnArea);
+        isVisible = main.getArea().matches(spawnArea);
     }
 
     @Override
     public List<Image> draw() {
         if(isVisible) {
             sprite.draw();
-            main.image(sprite.getImage(), Math.max(0, x - 16), Math.max(0, y - 16));
+
+            if(animationTimers[0] > type.getAnimationDelays()[0][animationTimers[1]]) {
+                animationTimers[0] = 0;
+                animationTimers[1] = animationTimers[1] >= 3 ? 0 : animationTimers[1] + 1;
+            } else animationTimers[0]++;
+
+            sprite = animations.get(state).get(animationTimers[1]);
+            sprite.setX(x + sprite.getOffsetX());
+            sprite.setY(y + sprite.getOffsetY());
+
             return List.of(sprite);
         }
         return new ArrayList<>();
@@ -106,10 +120,7 @@ public abstract class Enemy extends Moveable {
                     image.popMatrix();
                 }
                 PImage pImage = image.get();
-                pImage.resize(
-                        (int) (image.width * Main.getGameScale()),
-                        (int) (image.height * Main.getGameScale())
-                );
+                pImage.resize(64, 64);
                 list.add(new Image(pImage, x, y));
             }
             animations.put(state, list);
@@ -118,8 +129,11 @@ public abstract class Enemy extends Moveable {
 
     @AllArgsConstructor
     enum Type {
-        SLIME("slime");
+        SLIME("slime", new int[][] {
+                { 38, 10, 10, 38 }
+        });
 
         @Getter private final String spriteTag;
+        @Getter private final int[][] animationDelays;
     }
 }

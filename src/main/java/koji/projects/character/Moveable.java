@@ -8,10 +8,6 @@ import lombok.Setter;
 
 public abstract class Moveable extends GameObject {
 
-    public Moveable() {
-        super();
-    }
-
     public abstract void loadSprites();
 
     @Getter @Setter protected int x, y, speed, health, defense, damage, attackSpeed;
