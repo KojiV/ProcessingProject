@@ -46,8 +46,10 @@ public class Main extends PApplet {
     @Getter private HashMap<String, Textbox> textboxes;
     @Getter private List<NPC> npcs;
 
-    public static String[] GOMETHODS = new String[] { "draw", "keyPressed", "keyReleased", "playerUpdated", "areaUpdate" };
-    public static Class<?>[][] GOCLASSES = new Class<?>[][] {
+    public static String[] GO_METHODS = new String[] {
+            "draw", "keyPressed", "keyReleased", "playerUpdated", "areaUpdate"
+    };
+    public static Class<?>[][] GO_CLASSES = new Class<?>[][] {
             new Class[0],
             new Class[] { KeyEvent.class },
             new Class[] { KeyEvent.class },

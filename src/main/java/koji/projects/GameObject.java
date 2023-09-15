@@ -24,7 +24,7 @@ public class GameObject {
 
         for (int i = 0; i < 5; i++) {
             try {
-                clazz.getDeclaredMethod(Main.GOMETHODS[i], Main.GOCLASSES[i]);
+                clazz.getDeclaredMethod(Main.GO_METHODS[i], Main.GO_CLASSES[i]);
                 Main.getMain().getGameObjects()[i].add(this);
             } catch (NoSuchMethodException ignored) {}
         }

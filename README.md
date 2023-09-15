@@ -6,6 +6,7 @@
  # To-do
  
   - [ ] Add enemies
+    - [ ] Fix an enemy spawning for everytime you visit an area
   - [ ] Fix sprite tree clipping **(Might not fix)**
   - [x] Keep one time boxes through sessions **(Fixed through player data)**
   - [x] Add game scaling feature (already added in non-pushed commit, but must be optimized) **(Added cuz I'm cool)**

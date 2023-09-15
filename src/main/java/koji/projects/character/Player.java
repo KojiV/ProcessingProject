@@ -180,6 +180,12 @@ public class Player extends Moveable {
                     if(main.getArea().changeArea(dir)) {
                         x = changedCords[0];
                         y = changedCords[1];
+
+                        try {
+                            getPlayer().updateStats();
+                        } catch (IOException e) {
+                            Main.println("oooo fuck...");
+                        }
                     }
                 }
             }
@@ -387,6 +393,9 @@ public class Player extends Moveable {
             }
             x = fC.getInt("x");
             y = fC.getInt("y");
+            sprite.setX(x);
+            sprite.setY(y);
+
             getArrow().setObjective(Objective.objFromId(fC.getInt("obj")));
             getArea().changeArea(fC.getInt("areaX"), fC.getInt("areaY"));
             for(String boxes : fC.getStringList("read-boxes"))

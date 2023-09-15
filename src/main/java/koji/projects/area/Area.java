@@ -8,6 +8,7 @@ import koji.projects.character.CollisionObject;
 import koji.projects.data.Objective;
 import koji.projects.enemies.Enemy;
 import koji.projects.enemies.Slime;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import org.simpleyaml.configuration.file.FileConfiguration;
@@ -18,6 +19,7 @@ import processing.event.KeyEvent;
 
 import java.io.*;
 import java.util.*;
+import java.util.function.BooleanSupplier;
 
 public class Area extends GameObject {
     @Getter
@@ -25,7 +27,6 @@ public class Area extends GameObject {
     @Getter private PImage currentFrontBackground = null;
 
     public Area() {
-        super();
         x = -Integer.MAX_VALUE;
         y = -Integer.MAX_VALUE;
 
@@ -40,7 +41,6 @@ public class Area extends GameObject {
     }
 
     public Area(int x, int y) {
-        super();
         this.x = x;
         this.y = y;
     }
@@ -158,12 +158,6 @@ public class Area extends GameObject {
 
         main.getBar().drawBar();
 
-        try {
-            getPlayer().updateStats();
-        } catch (IOException e) {
-            Main.println("oooo fuck...");
-        }
-
         main.areaUpdate();
 
         return true;
@@ -189,7 +183,7 @@ public class Area extends GameObject {
     private boolean titleMovingRight;
     private final int[] titleScreenCords = new int[] { 68, 14 };
     private Image titleScreenArrow = null;
-    private boolean newGameSelected = true;
+    private TitleScreenOptions option = TitleScreenOptions.NEW;
 
     @Getter private HashMap<int[], List<Integer>> topLayerAreas = new HashMap<>();
 
@@ -203,6 +197,8 @@ public class Area extends GameObject {
                 main.stroke(255, 0, 124);
                 main.fill(255, 0, 124);
                 main.rect(0, 0, 1024, 120);
+
+
                 main.translate(Main.getGameScale() * 512, Main.getGameScale() * 200);
                 main.rotate(Main.radians(titleVars[3]));
                 main.textFont(main.getTitleFont());
@@ -212,17 +208,11 @@ public class Area extends GameObject {
                 main.text("Test", 0, 0);
                 main.fill(255);
                 main.text("Test", -6, -6);
-                main.circle(0, 0, Main.getGameScale() * 5);
+
+
                 main.textSize(Main.getGameScale() * 32);
-                main.fill(0);
-                main.text("New Game", 0, 50); //14 =
-                main.fill(255);
-                main.text("New Game", -4, 46);
-                main.fill(0);
-                main.text("Continue", 0, 85); //
-                if (main.isCouldLoadData()) {
-                    main.fill(255);
-                    main.text("Continue", -4, 81);
+                for(TitleScreenOptions options : TitleScreenOptions.values()) {
+                    options.displayText();
                 }
 
                 if(titleScreenArrow != null) {
@@ -264,21 +254,20 @@ public class Area extends GameObject {
     public void keyPressed(KeyEvent event) {
         if(isOnTitleScreen()) {
             int key = event.getKeyCode();
-            if(key == main.getUpKey() ||
-                    key == main.getDownKey() ||
-                    key == main.getLeftKey() ||
-                    key == main.getRightKey() ||
-                    key == Main.UP || key == Main.DOWN ||
-                    key == Main.LEFT || key == Main.RIGHT
-            ) {
-                if(main.isCouldLoadData()) {
-                    newGameSelected = !newGameSelected;
-                    titleScreenCords[1] = newGameSelected ? 14 : 49;
-                }
-            } else if (key == Main.ENTER) {
+            Set<Integer> previous = new HashSet<>(Arrays.asList(
+                    main.getUpKey(), main.getLeftKey(), Main.UP, Main.LEFT
+            ));
+            Set<Integer> next = new HashSet<>(Arrays.asList(
+                    main.getDownKey(), main.getRightKey(), Main.DOWN, Main.RIGHT
+            ));
+
+            if(previous.contains(key) || next.contains(key)) {
+                option = option.get(previous.contains(key));
+                titleScreenCords[1] = option.getArrowCords();
+            } else if (key == Main.ENTER && option != TitleScreenOptions.SETTINGS) {
                 main.translate(0, 0);
                 main.rotate(0);
-                if(newGameSelected || !getPlayer().readStats()) {
+                if(option == TitleScreenOptions.NEW || !getPlayer().readStats()) {
                     if(new File(Main.getPrefix() + "data/player/player.yml").exists()) {
                         new File(Main.getPrefix() + "data/player/player.yml").delete();
                     }
@@ -376,5 +365,53 @@ public class Area extends GameObject {
 
     public boolean isOnTitleScreen() {
         return x == -Integer.MAX_VALUE && y == -Integer.MAX_VALUE;
+    }
+
+    @AllArgsConstructor
+    enum TitleScreenOptions {
+        NEW("New Game"),
+        CONTINUE("Continue", () -> main.isCouldLoadData()),
+        SETTINGS("Settings");
+
+        TitleScreenOptions(String label) {
+            this.label = label;
+            fillCondition = () -> true;
+        }
+
+        private final String label;
+        private final BooleanSupplier fillCondition;
+
+        private static final int ARROW_CORD_BASE = 14, TEXT_CORD_BASE = 50;
+
+        public int getArrowCords() {
+            return ARROW_CORD_BASE + 35 * ordinal();
+        }
+
+        public int getTextCords() {
+            return TEXT_CORD_BASE + 35 * ordinal();
+        }
+
+        public void displayText() {
+            main.fill(0);
+            main.text(label, 0, getTextCords()); //14 =
+            if(fillCondition.getAsBoolean()) {
+                main.fill(255);
+                main.text(label, -4, getTextCords() - 4);
+            }
+        }
+
+        public TitleScreenOptions get(boolean previous) {
+            TitleScreenOptions option = next(previous);
+            if(!option.fillCondition.getAsBoolean()) option = option.next(previous);
+            return option;
+        }
+
+        private TitleScreenOptions next(boolean previous) {
+            TitleScreenOptions[] values = TitleScreenOptions.values();
+            int move = ordinal() + (previous ? -1 : 1);
+            if(move < 0) move = values.length - 1;
+            else if(move >= values.length) move = 0;
+            return values[move];
+        }
     }
 }
