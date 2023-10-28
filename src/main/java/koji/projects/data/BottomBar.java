@@ -26,11 +26,11 @@ public class BottomBar extends GameObject {
                 main.fill(255);
 
                 main.textSize(Main.getGameScale() * 24);
-                main.text("Health: " + main.getPlayer().getHealth(), 20, 613);
-                main.text("Speed: " + main.getPlayer().getSpeed(), 20, 647);
-                main.text("Defense: " + main.getPlayer().getDefense(), 20, 681);
-                main.text("Damage: " + main.getPlayer().getDamage(), 210, 612);
-                main.text("Atk Spd: " + main.getPlayer().getAttackSpeed(), 210, 647);
+                main.text("Health: " + (int) main.getPlayer().getHealth(), 20, 613);
+                main.text("Speed: " + (int) main.getPlayer().getSpeed(), 20, 647);
+                main.text("Defense: " + (int) main.getPlayer().getDefense(), 20, 681);
+                main.text("Damage: " + (int) main.getPlayer().getDamage(), 210, 612);
+                main.text("Atk Spd: " + (int) main.getPlayer().getAttackSpeed(), 210, 647);
 
                 main.textSize(Main.getGameScale() * 18);
                 main.text("Objective: ", 648, 616);

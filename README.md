@@ -6,7 +6,7 @@
  # To-do
  
   - [ ] Add enemies
-    - [ ] Fix an enemy spawning for everytime you visit an area
+    - [x] Fix an enemy spawning for everytime you visit an area **(Fixed by adding "destroy" function)**
   - [ ] Fix going to non-existent area causing the player the get stuck
   - [ ] Fix sprite tree clipping **(Might not fix)**
   - [x] Keep one time boxes through sessions **(Fixed through player data)**

@@ -10,7 +10,7 @@ public abstract class Moveable extends GameObject {
 
     public abstract void loadSprites();
 
-    @Getter @Setter protected int x, y, speed, health, defense, damage, attackSpeed;
+    @Getter @Setter protected float x, y, speed, health, defense, damage, attackSpeed;
 
     @Getter protected final boolean[] moving = new boolean[4];
     @Getter @Setter protected State state;
@@ -38,5 +38,13 @@ public abstract class Moveable extends GameObject {
         @Getter
         private final boolean attackingState;
         @Getter private final int firstOffsetX, firstOffsetY, secondOffsetX, secondOffsetY;
+    }
+
+    public double getEffectiveX() {
+        return x + sprite.getWidth() / 2;
+    }
+
+    public double getEffectiveY() {
+        return y + sprite.getHeight() / 2;
     }
 }

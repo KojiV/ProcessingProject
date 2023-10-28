@@ -40,6 +40,8 @@ public class Main extends PApplet {
     @Getter private int mapScale;
     @Getter private PFont textFont, titleFont;
     @Getter private boolean couldLoadData = false;
+    @Getter @Setter private boolean gridEnabled;
+    @Getter private boolean[][] highlight;
 
     @Override public void settings() { size((int) (gameScale * 1024), (int) (gameScale * 696)); }
 
@@ -125,6 +127,8 @@ public class Main extends PApplet {
             rightKey = 83;
             eKey = 70;
         }
+
+        highlight = new boolean[32][18];
     }
 
     @Getter private int upKey = 87, downKey = 83, leftKey = 65, rightKey = 68, eKey = 69;
@@ -193,9 +197,31 @@ public class Main extends PApplet {
             r.setPreviousDrawImages(r.draw());
         }
         if(intersects((int) x1, (int) y1, (int) (x2 - x1), (int) (y2 - y1),
-                0, (int) (gameScale * 574), (int) (gameScale * 1028), (int) (gameScale * 124))
+                0, (int) (gameScale * 574) - 10, (int) (gameScale * 1028), (int) (gameScale * 124) + 10)
         ) {
             bar.drawBar();
+        }
+        if(gridEnabled) {
+            for(int x = 0; x < 32; x++) {
+                strokeWeight(2 * gameScale);
+                line(x * getMapScale() * gameScale, 0,
+                        x * getMapScale() * gameScale,
+                        (18 * getMapScale() + getMapScale() - 1) * gameScale
+                );
+                for(int y = 0; y < 18; y++) {
+
+                    if(highlight[x][y]) {
+                        square(x * getMapScale() * gameScale,
+                                y * getMapScale() * gameScale,
+                                getMapScale() * gameScale
+                        );
+                    } else line(0,
+                            y * getMapScale() * gameScale,
+                            (32 * getMapScale() + getMapScale() - 1) * gameScale,
+                            y * getMapScale() * gameScale
+                    );
+                }
+            }
         }
     }
 

@@ -2,7 +2,6 @@ package koji.projects.character;
 
 import koji.projects.Image;
 import koji.projects.Main;
-import koji.projects.Utils;
 import koji.projects.area.Arrow;
 import koji.projects.data.BottomBar;
 import koji.projects.data.Objective;
@@ -72,22 +71,27 @@ public class Player extends Moveable {
         return getNearbyCollisionBoxes(getArea().getCollisions(), x, y);
     }
 
-    public List<CollisionObject> getNearbyCollisionBoxes(List<CollisionObject> boxes, int x, int y) {
-        int tileX = x / main.getMapScale();
-        int tileY = y / main.getMapScale();
-        int index = tileX * 18 + tileY;
+    public List<CollisionObject> getNearbyCollisionBoxes(CollisionObject[][] boxes, float x, float y) {
+        int tileX = (int) x / main.getMapScale();
+        int tileY = (int) y / main.getMapScale();
 
-        return new ArrayList<>(Stream.of(
-                Utils.getOrDefault(boxes, index, null),
-                Utils.getOrDefault(boxes, index + 1, null),
-                Utils.getOrDefault(boxes, index - 1, null),
-                Utils.getOrDefault(boxes, index - 19, null),
-                Utils.getOrDefault(boxes, index - 18, null),
-                Utils.getOrDefault(boxes, index - 17, null),
-                Utils.getOrDefault(boxes, index + 19, null),
-                Utils.getOrDefault(boxes, index + 18, null),
-                Utils.getOrDefault(boxes, index + 17, null)
-        ).filter(Objects::nonNull).toList());
+        int[][] offsets = {
+                { 0, 0 }, { 1, 0 }, { -1, 0 },
+                { 0, 1 }, { 1, 1 }, { -1, 1 },
+                { 0, -1 }, { 1, -1 }, { -1, -1 },
+        };
+
+        List<CollisionObject> objs = new ArrayList<>(9);
+        for(int i = 0; i < 9; i++) {
+            int findX = tileX + offsets[i][0];
+            int findY = tileY + offsets[i][1];
+            if(findX > -1 && findX < 32 &&
+                    findY > -1 && findY < 18 &&
+                    boxes[findX][findY] != null
+            ) objs.add(boxes[findX][findY]);
+        }
+
+        return objs;
     }
 
     private final static HashMap<State, List<Image>> animations = new HashMap<>();
@@ -141,8 +145,8 @@ public class Player extends Moveable {
 
     public void useLegs() {
         for(int theSpeed = 0; theSpeed < speed; theSpeed++) {
-            int moveX = x + parseAddedX();
-            int moveY = y + parseAddedY();
+            float moveX = x + parseAddedX();
+            float moveY = y + parseAddedY();
 
             if (parseAddedX() != 0 || parseAddedY() != 0) {
                 List<CollisionObject> nearbyObjects = getNearbyCollisionBoxes();
@@ -165,7 +169,7 @@ public class Player extends Moveable {
                 } else if (Arrays.stream(Arrow.Direction.getCoreDirections()).anyMatch(
                         d -> isOffscreen(d) && canMove(d)
                 )) {
-                    int[] changedCords = new int[]{ x, y };
+                    float[] changedCords = new float[]{ x, y };
 
                     Arrow.Direction dir = Arrays.stream(Arrow.Direction.getCoreDirections()).filter(
                             d -> isOffscreen(d) && canMove(d)
@@ -205,7 +209,7 @@ public class Player extends Moveable {
                 getArea().getX(), getArea().getY()
         )) return false;
 
-        int[] changedCords = new int[]{x, y};
+        float[] changedCords = new float[]{x, y};
 
         switch (dir) {
             case UP -> changedCords[1] = 2;
@@ -214,9 +218,7 @@ public class Player extends Moveable {
             case RIGHT -> changedCords[0] = 1022 - width;
         }
 
-        List<CollisionObject> objects = getArea().loadCollisions(nextArea[0], nextArea[1]);
-
-        if(objects.isEmpty()) return false;
+        CollisionObject[][] objects = getArea().loadCollisions(nextArea[0], nextArea[1]);
         return getNearbyCollisionBoxes(
                 objects,
                 changedCords[0], changedCords[1]
@@ -448,8 +450,6 @@ public class Player extends Moveable {
             e.printStackTrace();
         }
     }
-
-
 
     @Getter @Setter private boolean hasSword = false;
 }

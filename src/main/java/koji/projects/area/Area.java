@@ -25,6 +25,7 @@ public class Area extends GameObject {
     @Getter
     private PImage currentBackBackground;
     @Getter private PImage currentFrontBackground = null;
+    private boolean refreshDraw;
 
     public Area() {
         x = -Integer.MAX_VALUE;
@@ -54,7 +55,7 @@ public class Area extends GameObject {
     }
 
     @Getter private int x, y;
-    @Getter private List<CollisionObject> collisions = new ArrayList<>();
+    @Getter private CollisionObject[][] collisions = new CollisionObject[32][18];
 
     @Getter private List<Enemy> enemies = new ArrayList<>();
 
@@ -64,6 +65,7 @@ public class Area extends GameObject {
         this.x = x;
         this.y = y;
 
+        enemies.forEach(Enemy::destroy);
         enemies = new ArrayList<>();
         File enemyFile = new File(Main.getPrefix() + "enemies.yml");
         if(enemyFile.exists()) {
@@ -79,7 +81,7 @@ public class Area extends GameObject {
                                     enemyFC.getInt(key + ".y"),
                                     this,
                                     enemyFC.getDouble(key + ".view-range"),
-                                    30
+                                    60
                             ));
                         }
                     }
@@ -136,10 +138,7 @@ public class Area extends GameObject {
                             }
                         }
                     }
-                    topLayerAreas.put(
-                            new int[] { x1 * getMapScale(), y1 * getMapScale() },
-                            list
-                    );
+                    topLayerAreas.put(new int[] { x1 * getMapScale(), y1 * getMapScale() }, list);
                 }
             }
         }
@@ -236,7 +235,6 @@ public class Area extends GameObject {
                 if (titleMovingRight) titleVars[3]++;
                 else titleVars[3]--;
             } else titleVars[0]++;
-            return new ArrayList<>();
         } else {
             while (titleVars[0] != 0) {
                 if(titleVars[0] != 5) {
@@ -247,6 +245,13 @@ public class Area extends GameObject {
                 }
                 else titleVars[0] = 0;
             }
+        }
+        if(refreshDraw) {
+            refreshDraw = false;
+            return new ArrayList<>(List.of(new Image(
+                    null, 0, 0, 0, 0,
+                    32 * getMapScale(), 18 * getMapScale())
+            ));
         }
         return new ArrayList<>();
     }
@@ -277,9 +282,11 @@ public class Area extends GameObject {
             }
         }
         if(event.getKey() == 't') System.out.println(main.frameRate);
+        if(event.getKey() == 'g') main.setGridEnabled(!main.isGridEnabled());
+        if(event.getKey() == 'j') refreshDraw = true;
     }
 
-    @SneakyThrows public List<CollisionObject> loadCollisions() {
+    @SneakyThrows public CollisionObject[][] loadCollisions() {
         File f = new File(Main.getPrefix() + "collisions/area" + x + "_" + y + ".txt");
         if(!f.exists()) {
             Main.println("LOADING AREA COLLISIONS, WAIT");
@@ -289,7 +296,7 @@ public class Area extends GameObject {
             if(!directory.exists()) boo = directory.mkdirs();
 
             boolean success = boo && f.createNewFile();
-            if(!success) return new ArrayList<>();
+            if(!success) return new CollisionObject[32][18];
 
             if(f.canWrite()) {
                 try (PrintWriter pw = new PrintWriter(f)) {
@@ -334,8 +341,8 @@ public class Area extends GameObject {
         return loadCollisions(x, y);
     }
 
-    @SneakyThrows public List<CollisionObject> loadCollisions(int areaX, int areaY) {
-        ArrayList<CollisionObject> collisions = new ArrayList<>(Collections.nCopies(576, null));
+    @SneakyThrows public CollisionObject[][] loadCollisions(int areaX, int areaY) {
+        CollisionObject[][] collisions = new CollisionObject[32][18];
         File f = new File(Main.getPrefix() + "collisions/area" + areaX + "_" + areaY + ".txt");
         if(f.exists()) {
             BufferedReader reader = new BufferedReader(new FileReader(f));
@@ -349,7 +356,7 @@ public class Area extends GameObject {
                         y * main.getMapScale(),
                         main.getMapScale(), main.getMapScale()
                 );
-                collisions.set(x * 18 + y, co);
+                collisions[x][y] = co;
             }
         }
         return collisions;

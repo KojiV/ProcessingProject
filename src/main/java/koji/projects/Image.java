@@ -6,36 +6,38 @@ import processing.core.PImage;
 
 public class Image {
     @Getter private final PImage image;
-    @Getter @Setter private float x, y, offsetX, offsetY;
+    @Getter @Setter private float x, y, offsetX, offsetY, width, height;
 
-    public Image(PImage image, float x, float y, int offsetX, int offsetY) {
+    public Image(PImage image, float x, float y, int offsetX, int offsetY, float width, float height) {
         this.image = image;
         this.x = x;
         this.y = y;
         this.offsetX = offsetX;
         this.offsetY = offsetY;
+        this.width = width;
+        this.height = height;
 
-        Main.resize(image);
+        if(image != null) Main.resize(image);
     }
 
     public Image(PImage image, float x, float y) {
-        this(image, x, y, 0, 0);
+        this(image, x, y, 0, 0, image.width, image.height);
     }
 
     public Image(PImage image, float x, float y, int[] offsets) {
-        this(image, x, y, offsets[0], offsets[1]);
+        this(image, x, y, offsets[0], offsets[1], image.width, image.height);
     }
 
     public Image(PImage image) {
         this(image, 0, 0);
     }
 
-    public int getWidth() {
-        return image.width;
+    public float getWidth() {
+        return width;
     }
 
-    public int getHeight() {
-        return image.height;
+    public float getHeight() {
+        return height;
     }
 
     public void draw() {

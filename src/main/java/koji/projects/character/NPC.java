@@ -79,13 +79,13 @@ public class NPC extends Textbox {
 
     @Override public boolean intersects(Player player) {
         if(!overCounter) return super.intersects(player);
-        int[] rec1 = {
+        float[] rec1 = {
                 player.getX(),
                 player.getY(),
                 player.getX() + player.getWidth(),
                 player.getY() + player.getHeight()
         };
-        int[] rec2 = {
+        float[] rec2 = {
                 x - player.getInteractRange(),
                 y - player.getInteractRange(),
                 x + getMapScale() + player.getInteractRange(),

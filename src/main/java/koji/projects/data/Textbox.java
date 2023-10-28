@@ -11,19 +11,19 @@ import java.util.List;
 
 @AllArgsConstructor
 public class Textbox extends GameObject {
-    @Getter protected int x, y;
+    @Getter protected float x, y;
     @Getter protected Area area;
     @Getter protected List<String> text;
     @Getter @Setter protected int objActivate;
 
     public boolean intersects(Player player) {
-        int[] rec1 = {
+        float[] rec1 = {
                 player.getX(),
                 player.getY(),
                 player.getX() + player.getWidth(),
                 player.getY() + player.getHeight()
         };
-        int[] rec2 = {
+        float[] rec2 = {
                 x - player.getInteractRange(),
                 y - player.getInteractRange(),
                 x + getMapScale() + player.getInteractRange(),

@@ -15,16 +15,18 @@ import java.util.List;
 
 public class GameObject {
     @Setter protected static Main main;
-    public GameObject() {
-        Class<?> clazz = getClass();
+    protected Class<?> thisClass;
 
-        do clazz = clazz.getSuperclass();
-        while (clazz != GameObject.class && clazz != null);
-        if(clazz == null) return;
+    public GameObject() {
+        thisClass = getClass();
+
+        do thisClass = thisClass.getSuperclass();
+        while (thisClass != GameObject.class && thisClass != null);
+        if(thisClass == null) return;
 
         for (int i = 0; i < 5; i++) {
             try {
-                clazz.getDeclaredMethod(Main.GO_METHODS[i], Main.GO_CLASSES[i]);
+                thisClass.getDeclaredMethod(Main.GO_METHODS[i], Main.GO_CLASSES[i]);
                 Main.getMain().getGameObjects()[i].add(this);
             } catch (NoSuchMethodException ignored) {}
         }

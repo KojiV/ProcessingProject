@@ -1,8 +1,6 @@
 package koji.projects.character;
 
 import koji.projects.GameObject;
-import koji.projects.Main;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 public class CollisionObject extends GameObject {
@@ -23,8 +21,8 @@ public class CollisionObject extends GameObject {
     @Getter private final boolean textBox;
 
     //!(x1 > x2 + width2 || x1 + width1 < x2 || y1 > y2 + height2 || y1 + height1 < y2);
-    public boolean intersects(Player player, int x2, int y2) {
-       int[] rec1 = { x2, y2, x2 + player.getWidth(), y2 + player.getHeight() };
+    public boolean intersects(Player player, float x2, float y2) {
+       float[] rec1 = { x2, y2, x2 + player.getWidth(), y2 + player.getHeight() };
        int[] rec2 = { x, y, x + width, y + height };
 
        boolean noOverlap = rec1[0] > rec2[2] ||
