@@ -32,18 +32,17 @@ public class Main extends PApplet {
         PApplet.main(Main.class, args);
     }
 
-    @Getter @Setter private static float gameScale = 0.75f;
+    public static final float GAME_SCALE = 0.75f;
+    public static final int MAP_SCALE = 32;
     @Getter private Player player;
     @Getter private Area area;
     @Getter private Arrow arrow;
     @Getter private BottomBar bar;
-    @Getter private int mapScale;
     @Getter private PFont textFont, titleFont;
     @Getter private boolean couldLoadData = false;
     @Getter @Setter private boolean gridEnabled;
-    @Getter private boolean[][] highlight;
 
-    @Override public void settings() { size((int) (gameScale * 1024), (int) (gameScale * 696)); }
+    @Override public void settings() { size((int) (GAME_SCALE * 1024), (int) (GAME_SCALE * 696)); }
 
     @Getter private HashMap<String, Textbox> textboxes;
     @Getter private List<NPC> npcs;
@@ -64,12 +63,11 @@ public class Main extends PApplet {
         GameObject.setMain(this);
 
         area = new Area();
-        mapScale = 32;
 
         couldLoadData = new File(prefix + "data/player/player.yml").exists();
 
-        textFont = createFont(prefix + "textures/font.ttf", (int) (gameScale * 16));
-        titleFont = createFont(prefix + "textures/titlefont.ttf", (int) (gameScale * 16));
+        textFont = createFont(prefix + "textures/font.ttf", (int) (GAME_SCALE * 16));
+        titleFont = createFont(prefix + "textures/titlefont.ttf", (int) (GAME_SCALE * 16));
 
         File textBoxesFile = new File(Main.getPrefix() + "data/textboxes.yml");
         FileConfiguration textBoxesConfig = YamlConfiguration.loadConfiguration(textBoxesFile);
@@ -81,8 +79,8 @@ public class Main extends PApplet {
             int areaX = textBoxesConfig.getInt(key + ".areaX");
             int areaY = textBoxesConfig.getInt(key + ".areaY");
             Textbox box = new Textbox(
-                    x * getMapScale(),
-                    y * getMapScale(),
+                    x * MAP_SCALE,
+                    y * MAP_SCALE,
                     new Area(areaX, areaY),
                     textBoxesConfig.getStringList(key + ".text"),
                     textBoxesConfig.contains(key + ".objActivate") ?
@@ -127,8 +125,6 @@ public class Main extends PApplet {
             rightKey = 83;
             eKey = 70;
         }
-
-        highlight = new boolean[32][18];
     }
 
     @Getter private int upKey = 87, downKey = 83, leftKey = 65, rightKey = 68, eKey = 69;
@@ -147,6 +143,8 @@ public class Main extends PApplet {
         float x1 = 1024, y1 = 696, x2 = 0, y2 = 0;
         boolean changed = false;
 
+        //TODO: Redo this system, trying to not have to redraw every ascept of the map every frame
+
         for(GameObject r : new ArrayList<>(gameObjects[0])) {
             for(Image img : r.getPreviousDrawImages()) {
                 float x = img.getX();
@@ -159,17 +157,17 @@ public class Main extends PApplet {
                 changed = true;
             }
         }
-        x1 *= gameScale;
-        y1 *= gameScale;
-        x2 *= gameScale;
-        y2 *= gameScale;
+        x1 *= GAME_SCALE;
+        y1 *= GAME_SCALE;
+        x2 *= GAME_SCALE;
+        y2 *= GAME_SCALE;
 
         boolean isNotEmpty = gameObjects[0].stream().anyMatch(go -> !go.getPreviousDrawImages().isEmpty());
         if(isNotEmpty && changed)
             //rect((int) x1 / gameScale, (int) y1 / gameScale, (int) (x2 - x1 + 10) / gameScale, (int) (y2 - y1 + 10) / gameScale);
             image(area.getCurrentBackBackground().get(
                     (int) x1, (int) y1, (int) (x2 - x1 + 10), (int) (y2 - y1 + 10)
-            ), x1 / gameScale, y1 / gameScale);
+            ), x1 / GAME_SCALE, y1 / GAME_SCALE);
 
         for(int i = 0; i < gameObjects[0].size(); i++) {
             GameObject r = gameObjects[0].get(i);
@@ -177,7 +175,7 @@ public class Main extends PApplet {
             if(r.getClass().equals(Arrow.class) && area.getCurrentFrontBackground() != null) {
                 image(area.getCurrentFrontBackground().get(
                         (int) x1,  (int) y1, (int) (x2 - x1 + 10), (int) (y2 - y1 + 10)
-                ), x1 / gameScale, y1 / gameScale);
+                ), x1 / GAME_SCALE, y1 / GAME_SCALE);
 
                 /*if(!gameObjects[0].get(i - 1).getPreviousDrawImages().isEmpty()) {
                     //Issue: once player is invisible once, they stay invisible
@@ -197,28 +195,22 @@ public class Main extends PApplet {
             r.setPreviousDrawImages(r.draw());
         }
         if(intersects((int) x1, (int) y1, (int) (x2 - x1), (int) (y2 - y1),
-                0, (int) (gameScale * 574) - 10, (int) (gameScale * 1028), (int) (gameScale * 124) + 10)
+                0, (int) (GAME_SCALE * 574) - 10, (int) (GAME_SCALE * 1028), (int) (GAME_SCALE * 124) + 10)
         ) {
             bar.drawBar();
         }
         if(gridEnabled) {
             for(int x = 0; x < 32; x++) {
-                strokeWeight(2 * gameScale);
-                line(x * getMapScale() * gameScale, 0,
-                        x * getMapScale() * gameScale,
-                        (18 * getMapScale() + getMapScale() - 1) * gameScale
+                strokeWeight(2 * GAME_SCALE);
+                line(x * MAP_SCALE * GAME_SCALE, 0,
+                        x * MAP_SCALE * GAME_SCALE,
+                        (18 * MAP_SCALE + MAP_SCALE - 1) * GAME_SCALE
                 );
                 for(int y = 0; y < 18; y++) {
-
-                    if(highlight[x][y]) {
-                        square(x * getMapScale() * gameScale,
-                                y * getMapScale() * gameScale,
-                                getMapScale() * gameScale
-                        );
-                    } else line(0,
-                            y * getMapScale() * gameScale,
-                            (32 * getMapScale() + getMapScale() - 1) * gameScale,
-                            y * getMapScale() * gameScale
+                    line(0,
+                            y * MAP_SCALE * GAME_SCALE,
+                            (32 * MAP_SCALE + MAP_SCALE - 1) * GAME_SCALE,
+                            y * MAP_SCALE * GAME_SCALE
                     );
                 }
             }
@@ -285,7 +277,7 @@ public class Main extends PApplet {
         return Math.hypot(
                 Math.abs(y1 - y2),
                 Math.abs(x1 - x2)
-        ) / main.getMapScale();
+        ) / main.MAP_SCALE;
     }
 
     // Override methods
@@ -293,20 +285,20 @@ public class Main extends PApplet {
 
     @Override
     public void image(PImage img, float a, float b) {
-        super.image(img, a * gameScale, b * gameScale);
+        super.image(img, a * GAME_SCALE, b * GAME_SCALE);
     }
 
     @Override
     public void rect(float a, float b, float c, float d) {
-        super.rect(gameScale * a, gameScale * b, gameScale * c, gameScale * d);
+        super.rect(GAME_SCALE * a, GAME_SCALE * b, GAME_SCALE * c, GAME_SCALE * d);
     }
 
     @Override
     public void text(String str, float x, float y) {
-        super.text(str, gameScale * x, gameScale * y);
+        super.text(str, GAME_SCALE * x, GAME_SCALE * y);
     }
 
     public static void resize(PImage img) {
-        img.resize((int) (img.width * gameScale), (int) (img.height * gameScale));
+        img.resize((int) (img.width * GAME_SCALE), (int) (img.height * GAME_SCALE));
     }
 }

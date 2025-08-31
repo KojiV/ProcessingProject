@@ -28,7 +28,7 @@ public class NPC extends Textbox {
                int objActivate, boolean overCounter, FileConfiguration fc, String key,
                boolean talkable
     ) {
-        super(x * getMapScale(), y * getMapScale(),
+        super(x * Main.MAP_SCALE, y * Main.MAP_SCALE,
                 new Area(areaX, areaY),
                 initialText == null ? normalText.getText() : initialText.getText(),
                 objActivate
@@ -88,8 +88,8 @@ public class NPC extends Textbox {
         float[] rec2 = {
                 x - player.getInteractRange(),
                 y - player.getInteractRange(),
-                x + getMapScale() + player.getInteractRange(),
-                y + getMapScale() * 2 + player.getInteractRange()
+                x + Main.MAP_SCALE + player.getInteractRange(),
+                y + Main.MAP_SCALE * 2 + player.getInteractRange()
         };
 
         boolean noOverlap = rec1[0] > rec2[2] ||

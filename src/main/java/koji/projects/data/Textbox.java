@@ -1,5 +1,6 @@
 package koji.projects.data;
 
+import koji.projects.Main;
 import koji.projects.area.Area;
 import koji.projects.GameObject;
 import koji.projects.character.Player;
@@ -26,8 +27,8 @@ public class Textbox extends GameObject {
         float[] rec2 = {
                 x - player.getInteractRange(),
                 y - player.getInteractRange(),
-                x + getMapScale() + player.getInteractRange(),
-                y + getMapScale() + player.getInteractRange()
+                x + Main.MAP_SCALE + player.getInteractRange(),
+                y + Main.MAP_SCALE + player.getInteractRange()
         };
 
         boolean noOverlap = rec1[0] > rec2[2] ||

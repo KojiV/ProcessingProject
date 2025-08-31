@@ -21,17 +21,17 @@ public class Arrow extends GameObject {
     @Getter @Setter private Image image;
 
     public void setX(int x, int offset) {
-        this.x = x * main.getMapScale() + offset;
+        this.x = x * Main.MAP_SCALE + offset;
     }
     public void setY(int y) {
-        this.y = y * main.getMapScale();
+        this.y = y * Main.MAP_SCALE;
     }
 
     public Arrow(Area area, Objective objective, int x, int y) {
         this.area = area;
         this.objective = objective;
-        this.x = x * main.getMapScale() + 5;
-        this.y = y * main.getMapScale();
+        this.x = x * Main.MAP_SCALE + 5;
+        this.y = y * Main.MAP_SCALE;
     }
 
     int[] movementFlags = new int[2];

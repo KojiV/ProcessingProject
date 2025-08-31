@@ -35,7 +35,7 @@ public class Area extends GameObject {
             PImage image = main.loadImage(
                     Main.getPrefix() + "textures/titlescreen/background/frame_" + i + "_delay-0.05s.png"
             );
-            image.resize((int) (Main.getGameScale() * 1024), (int) (Main.getGameScale() * 576));
+            image.resize((int) (Main.GAME_SCALE * 1024), (int) (Main.GAME_SCALE * 576));
             titleScreenImages[i] = image;
         }
         currentBackBackground = titleScreenImages[0];
@@ -115,10 +115,10 @@ public class Area extends GameObject {
         topLayerAreas = new HashMap<>();
         for(int x1 = 0; x1 < 32; x1++) {
             for(int y1 = 0; y1 < 18; y1++) {
-                int scaledX = x1 * getMapScale();
-                int scaledY = y1 * getMapScale();
+                int scaledX = x1 * Main.MAP_SCALE;
+                int scaledY = y1 * Main.MAP_SCALE;
 
-                int corner1 = getMapScale() - 1;
+                int corner1 = Main.MAP_SCALE - 1;
                 int[] corners = {
                         scaledX + scaledY * currentFrontBackground.width,
                         scaledX + corner1 + (scaledY + corner1) * currentFrontBackground.width,
@@ -130,15 +130,15 @@ public class Area extends GameObject {
                         main.alpha(currentFrontBackground.pixels[c]) != 0
                 )) {
                     List<Integer> list = new ArrayList<>();
-                    for(int offsetX = 0; offsetX < getMapScale(); offsetX++) {
-                        for(int offsetY = 0; offsetY < getMapScale(); offsetY++) {
+                    for(int offsetX = 0; offsetX < Main.MAP_SCALE; offsetX++) {
+                        for(int offsetY = 0; offsetY < Main.MAP_SCALE; offsetY++) {
                             int loc = scaledX + offsetX + (scaledY + offsetY) * currentFrontBackground.width;
                             if(main.alpha(currentFrontBackground.pixels[loc]) != 0) {
                                 list.add(loc);
                             }
                         }
                     }
-                    topLayerAreas.put(new int[] { x1 * getMapScale(), y1 * getMapScale() }, list);
+                    topLayerAreas.put(new int[] { x1 * Main.MAP_SCALE, y1 * Main.MAP_SCALE }, list);
                 }
             }
         }
@@ -198,10 +198,10 @@ public class Area extends GameObject {
                 main.rect(0, 0, 1024, 120);
 
 
-                main.translate(Main.getGameScale() * 512, Main.getGameScale() * 200);
+                main.translate(Main.GAME_SCALE * 512, Main.GAME_SCALE * 200);
                 main.rotate(Main.radians(titleVars[3]));
                 main.textFont(main.getTitleFont());
-                main.textSize(Main.getGameScale() * 128);
+                main.textSize(Main.GAME_SCALE * 128);
                 main.fill(0);
                 main.textAlign(main.CENTER);
                 main.text("Test", 0, 0);
@@ -209,7 +209,7 @@ public class Area extends GameObject {
                 main.text("Test", -6, -6);
 
 
-                main.textSize(Main.getGameScale() * 32);
+                main.textSize(Main.GAME_SCALE * 32);
                 for(TitleScreenOptions options : TitleScreenOptions.values()) {
                     options.displayText();
                 }
@@ -250,7 +250,7 @@ public class Area extends GameObject {
             refreshDraw = false;
             return new ArrayList<>(List.of(new Image(
                     null, 0, 0, 0, 0,
-                    32 * getMapScale(), 18 * getMapScale())
+                    32 * Main.MAP_SCALE, 18 * Main.MAP_SCALE)
             ));
         }
         return new ArrayList<>();
@@ -316,9 +316,9 @@ public class Area extends GameObject {
 
                     for (int x1 = 0; x1 < 32; x1++) {
                         for (int y1 = 0; y1 < 18; y1++) {
-                            int getX = main.getMapScale() * x1;
-                            int getY = main.getMapScale() * y1;
-                            int wh = main.getMapScale();
+                            int getX = Main.MAP_SCALE * x1;
+                            int getY = Main.MAP_SCALE * y1;
+                            int wh = Main.MAP_SCALE;
 
                             PImage area = image.get(getX, getY, wh, wh);
 
@@ -352,9 +352,9 @@ public class Area extends GameObject {
                 int x = Integer.parseInt(split[0]);
                 int y = Integer.parseInt(split[1]);
                 CollisionObject co = new CollisionObject(
-                        x * main.getMapScale(),
-                        y * main.getMapScale(),
-                        main.getMapScale(), main.getMapScale()
+                        x * Main.MAP_SCALE,
+                        y * Main.MAP_SCALE,
+                        Main.MAP_SCALE, Main.MAP_SCALE
                 );
                 collisions[x][y] = co;
             }

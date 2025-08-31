@@ -22,8 +22,8 @@ public abstract class Enemy extends Moveable {
     @Getter private final Type type;
 
     public Enemy(int spawnX, int spawnY, Area spawnArea, Type type, double viewRange) {
-        this.x = spawnX * getMapScale();
-        this.y = spawnY * getMapScale();
+        this.x = spawnX * Main.MAP_SCALE;
+        this.y = spawnY * Main.MAP_SCALE;
         this.spawnArea = spawnArea;
         this.type = type;
         this.viewRange = viewRange;
@@ -78,16 +78,12 @@ public abstract class Enemy extends Moveable {
     }
 
     public boolean canSeePlayer() {
-        double x1 = getEffectiveX() / getMapScale(),
-                y1 = getEffectiveY() / getMapScale(),
-                x2 = main.getPlayer().getEffectiveX() / getMapScale(),
-                y2 = main.getPlayer().getEffectiveY() / getMapScale();
+        double x1 = getEffectiveX() / Main.MAP_SCALE,
+                y1 = getEffectiveY() / Main.MAP_SCALE,
+                x2 = main.getPlayer().getEffectiveX() / Main.MAP_SCALE,
+                y2 = main.getPlayer().getEffectiveY() / Main.MAP_SCALE;
 
-        for(int x = 0; x < 32; x++) {
-            for(int y = 0; y < 18; y++) {
-                main.getHighlight()[x][y] = false;
-            }
-        }
+
 
         slope = (y2 - y1) / (x2 - x1);
         slope = slope == Double.NEGATIVE_INFINITY ? -90 : slope == Double.POSITIVE_INFINITY ? 90 : slope;
@@ -118,7 +114,6 @@ public abstract class Enemy extends Moveable {
             if(y >= 0 && y < 32 && x >= 0 && x < 18 &&
                     main.getArea().getCollisions()[x][y] != null
             ) return false;
-            main.getHighlight()[x][y] = true;
         }
         return true;
     }

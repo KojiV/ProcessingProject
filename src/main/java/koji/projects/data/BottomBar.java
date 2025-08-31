@@ -6,6 +6,7 @@ import koji.projects.Utils;
 import koji.projects.character.NPC;
 import lombok.Getter;
 import lombok.Setter;
+import processing.core.PConstants;
 import processing.event.KeyEvent;
 
 public class BottomBar extends GameObject {
@@ -21,18 +22,18 @@ public class BottomBar extends GameObject {
         main.rect(3, 577, 1018, 114);
         switch (barState) {
             case STANDARD -> {
-                main.textAlign(main.LEFT);
+                main.textAlign(PConstants.LEFT);
                 main.textFont(main.getTextFont());
                 main.fill(255);
 
-                main.textSize(Main.getGameScale() * 24);
+                main.textSize(Main.GAME_SCALE * 24);
                 main.text("Health: " + (int) main.getPlayer().getHealth(), 20, 613);
                 main.text("Speed: " + (int) main.getPlayer().getSpeed(), 20, 647);
                 main.text("Defense: " + (int) main.getPlayer().getDefense(), 20, 681);
                 main.text("Damage: " + (int) main.getPlayer().getDamage(), 210, 612);
                 main.text("Atk Spd: " + (int) main.getPlayer().getAttackSpeed(), 210, 647);
 
-                main.textSize(Main.getGameScale() * 18);
+                main.textSize(Main.GAME_SCALE * 18);
                 main.text("Objective: ", 648, 616);
                 main.text(getArrow().getObjective().getText(), 796, 616);
             }
@@ -46,7 +47,7 @@ public class BottomBar extends GameObject {
         main.textAlign(main.CENTER);
         main.textFont(main.getTextFont());
         main.fill(255);
-        main.textSize(Main.getGameScale() * 32);
+        main.textSize(Main.GAME_SCALE * 32);
 
         String text = Utils.getOrDefault(textbox.getText(), currentTextboxPage, "");
         StringBuilder sb = new StringBuilder(text);

@@ -59,10 +59,6 @@ public class GameObject {
         return getArrow().getObjective();
     }
 
-    public static int getMapScale() {
-        return main.getMapScale();
-    }
-
     private HashMap<String, Textbox> cachedBoxes = new HashMap<>();
     private int cachedX = -Integer.MAX_VALUE;
     private int cachedY = -Integer.MAX_VALUE;

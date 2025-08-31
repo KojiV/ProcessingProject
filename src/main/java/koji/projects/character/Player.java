@@ -72,8 +72,8 @@ public class Player extends Moveable {
     }
 
     public List<CollisionObject> getNearbyCollisionBoxes(CollisionObject[][] boxes, float x, float y) {
-        int tileX = (int) x / main.getMapScale();
-        int tileY = (int) y / main.getMapScale();
+        int tileX = (int) x / Main.MAP_SCALE;
+        int tileY = (int) y / Main.MAP_SCALE;
 
         int[][] offsets = {
                 { 0, 0 }, { 1, 0 }, { -1, 0 },
@@ -189,6 +189,7 @@ public class Player extends Moveable {
                             getPlayer().updateStats();
                         } catch (IOException e) {
                             Main.println("oooo fuck...");
+                            e.printStackTrace();
                         }
                     }
                 }
@@ -261,13 +262,15 @@ public class Player extends Moveable {
                     case 3 -> correctState = !state.isAttackingState() ? State.MOVE_RIGHT : State.ATTACK_RIGHT;
                 }
 
-                if(!state.isAttackingState()) walkFunction();
-                else attackFunction();
-                sprite = animations.get(correctState).get(moveTimer2);
-                sprite.setX(x);
-                sprite.setY(y);
+                if(main.getBar().getBarState() != BottomBar.BarState.TEXT) {
+                    if (!state.isAttackingState()) walkFunction();
+                    else attackFunction();
+                    sprite = animations.get(correctState).get(moveTimer2);
+                    sprite.setX(x);
+                    sprite.setY(y);
 
-                main.playerUpdated();
+                    main.playerUpdated();
+                }
             }
             sprite.draw();
             return List.of(sprite);
@@ -346,7 +349,7 @@ public class Player extends Moveable {
             }
         }
         if(event.getKey() == 'c')
-            Main.println("Cords:", x, y, x / main.getMapScale(), y / main.getMapScale());
+            Main.println("Cords:", x, y, x / Main.MAP_SCALE, y / Main.MAP_SCALE);
     }
 
     public void keyReleased(KeyEvent event) {
@@ -420,6 +423,7 @@ public class Player extends Moveable {
 
     public void updateStats() throws IOException {
         if (!playerData.exists()) {
+            new File(Main.getPrefix() + "data/player/").mkdirs();
             playerData.createNewFile();
         }
 

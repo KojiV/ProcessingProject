@@ -1,6 +1,7 @@
 package koji.projects.character;
 
 import koji.projects.GameObject;
+import koji.projects.Main;
 import lombok.Getter;
 
 public class CollisionObject extends GameObject {
@@ -37,6 +38,6 @@ public class CollisionObject extends GameObject {
         return Math.hypot(
                 Math.abs(y - this.y),
                 Math.abs(x - this.x)
-        ) / main.getMapScale();
+        ) / Main.MAP_SCALE;
     }
 }
